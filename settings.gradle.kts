@@ -1,4 +1,4 @@
-rootProject.name = "GrimAPI"
+rootProject.name = "DarknessAPI"
 
 dependencyResolutionManagement {
     versionCatalogs {
@@ -8,4 +8,4 @@ dependencyResolutionManagement {
     }
 }
 
-include(":grim-bukkit-api")
+include(":darkness-bukkit-api")

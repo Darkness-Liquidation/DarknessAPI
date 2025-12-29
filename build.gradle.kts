@@ -1,5 +1,4 @@
 import versioning.BuildFlags // Assuming these helpers are compatible
-import versioning.VersionUtil // Assuming these helpers are compatible
 import org.gradle.api.JavaVersion
 import java.util.Properties
 
@@ -13,7 +12,7 @@ BuildFlags.init(project) // Initialize your build flags helper
 
 /**
  * ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
- * ┃               GrimAPI Epoch Versioning Scheme                ┃
+ * ┃               DarknessAPI Epoch Versioning Scheme                ┃
  * ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
  *
  * Base versioning uses a 4-part Epoch Versioning scheme, similar to
@@ -78,10 +77,10 @@ BuildFlags.init(project) // Initialize your build flags helper
 val baseVersion = project.findProperty("version") as String
 
 // --- Standard Project Configuration ---
-group = "ac.grim.grimac" // Or your desired group ID
+group = "ac.darkness.darknessac" // Or your desired group ID
 // VersionUtil appends commit/branch metadata if not a release build
-version = VersionUtil.compute(baseVersion)
-description = "GrimAPI"
+version = "1.0"
+description = "DarknessAPI"
 
 println("⚙️  Build flags     → release=${BuildFlags.release}")
 println("📦 Project version → $version")
