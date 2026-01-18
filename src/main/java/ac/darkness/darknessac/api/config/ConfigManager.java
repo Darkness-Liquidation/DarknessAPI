@@ -27,6 +27,7 @@ public interface ConfigManager extends BasicReloadable {
     @Nullable <T> T get(String key);
 
     @Nullable <T> T getElse(String key, T otherwise);
+    void setBoolean(String var1, boolean var2);
 
     @Nullable <K, V> Map<K, V> getMap(String key);
 

@@ -6,6 +6,7 @@ import ac.darkness.darknessac.api.feature.FeatureManager;
 import ac.darkness.darknessac.api.handler.UserHandlerHolder;
 import org.jetbrains.annotations.Nullable;
 
+import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -24,6 +25,7 @@ public interface DarknessUser extends ConfigReloadable, BasicReloadable, UserHan
     int getKeepAlivePing();
 
     String getVersionName();
+    InetSocketAddress getAddress();
 
     double getHorizontalSensitivity();
 
