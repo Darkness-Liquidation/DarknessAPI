@@ -9,8 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Manager for registering and retrieving custom punishment animations.
  */
-public class PunishmentAnimationManager {
-    private static final Map<String, PunishmentAnimation> animations = new ConcurrentHashMap<>();
+public class PunishAnimationManager {
+    private static final Map<String, PunishAnimation> animations = new ConcurrentHashMap<>();
 
     /**
      * Registers a custom punishment animation.
@@ -19,7 +19,7 @@ public class PunishmentAnimationManager {
      * @param animation The animation implementation
      * @return true if registered successfully, false if name already exists
      */
-    public static boolean registerAnimation(@NotNull String name, @NotNull PunishmentAnimation animation) {
+    public static boolean registerAnimation(@NotNull String name, @NotNull PunishAnimation animation) {
         String key = name.toUpperCase();
         if (animations.containsKey(key)) {
             return false;
@@ -45,7 +45,7 @@ public class PunishmentAnimationManager {
      * @return The animation, or null if not found
      */
     @Nullable
-    public static PunishmentAnimation getAnimation(@NotNull String name) {
+    public static PunishAnimation getAnimation(@NotNull String name) {
         return animations.get(name.toUpperCase());
     }
 
