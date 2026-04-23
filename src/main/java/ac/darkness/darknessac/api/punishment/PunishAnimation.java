@@ -9,11 +9,11 @@ import java.util.List;
  * when punishing players for cheating.
  */
 @FunctionalInterface
-public interface PunishmentAnimation {
+public interface PunishAnimation {
     /**
      * Executes the punishment animation for the given player.
      *
-     * @param user The DarknessUser to punish
+     * @param user The user to punish (DarknessPlayer or DarknessUser)
      * @param commands The list of commands to execute after the animation completes
      */
     void execute(@NotNull Object user, @NotNull List<String> commands);
