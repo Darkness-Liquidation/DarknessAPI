@@ -31,6 +31,26 @@ public interface DarknessUser extends ConfigReloadable, BasicReloadable, UserHan
 
     double getVerticalSensitivity();
 
+    default double getX() {
+        return 0.0;
+    }
+
+    default double getY() {
+        return 0.0;
+    }
+
+    default double getZ() {
+        return 0.0;
+    }
+
+    default float getYaw() {
+        return 0.0f;
+    }
+
+    default float getPitch() {
+        return 0.0f;
+    }
+
     boolean isVanillaMath();
 
     void updatePermissions();
