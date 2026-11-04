@@ -1,8 +1,12 @@
 package ac.darkness.darknessac.api.punishment;
 
+import ac.darkness.darknessac.api.DarknessUser;
+import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,7 +17,14 @@ public class PunishAnimationManager {
     private static final Map<String, PunishAnimation> animations = new ConcurrentHashMap<>();
 
     /**
-     * Registers a custom punishment animation.
+     * Internal animation executor used by {@link AnimationMode}.
+     * Typically set by the Darkness core plugin on startup.
+     */
+    @Getter @Setter
+    private static volatile AnimationExecutor executor;
+
+    /**
+     * Registers a custom punishment animation or animation constructor mode.
      *
      * @param name The name/identifier for the animation (case-insensitive)
      * @param animation The animation implementation
@@ -64,5 +75,13 @@ public class PunishAnimationManager {
      */
     public static void clearAnimations() {
         animations.clear();
+    }
+
+    /**
+     * Internal executor interface bridging {@link AnimationMode} to the Darkness execution engine.
+     */
+    @FunctionalInterface
+    public interface AnimationExecutor {
+        void execute(@NotNull AnimationMode mode, @NotNull DarknessUser user, @NotNull List<String> commands);
     }
 }

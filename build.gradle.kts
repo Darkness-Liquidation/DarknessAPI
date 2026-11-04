@@ -124,6 +124,9 @@ allprojects {
 
 publishing {
     publications.create<MavenPublication>("maven") {
+        groupId = "com.github.1hendex"
+        artifactId = "DarknessAPI"
+        version = "1.0.0"
         // Use the calculated version (EPOCH.MAJOR.MINOR.PATCH + optional metadata)
         version = project.version.toString()
         from(components["java"])

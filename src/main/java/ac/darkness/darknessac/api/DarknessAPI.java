@@ -1,5 +1,6 @@
 package ac.darkness.darknessac.api;
 
+import ac.darkness.darknessac.api.punishment.AnimationMode;
 import ac.darkness.darknessac.api.punishment.PunishAnimation;
 import ac.darkness.darknessac.api.punishment.PunishAnimationManager;
 import org.bukkit.entity.Player;
@@ -20,6 +21,19 @@ public class DarknessAPI {
      * @return true if registered successfully, false if already exists
      */
     public static boolean registerAnimation(@NotNull String name, @NotNull PunishAnimation animation) {
+        return PunishAnimationManager.registerAnimation(name, animation);
+    }
+
+    /**
+     * Registers a custom punishment animation mode.
+     * <p>
+     * Darkness will handle ticking the animation and running punishment commands when it completes.
+     *
+     * @param name Animation name (case-insensitive, e.g. "FLAME", "LIGHTNING").
+     * @param animation The animation mode to register.
+     * @return True if registered, false if the name is already taken.
+     */
+    public static boolean registerAnimation(@NotNull String name, @NotNull AnimationMode animation) {
         return PunishAnimationManager.registerAnimation(name, animation);
     }
 
