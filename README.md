@@ -27,7 +27,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.1hendex:DarknessAPI:Tag")
+    compileOnly("com.github.Darkness-Liquidation.DarknessAPI:DarknessAPI:Tag")
 }
 ```
 
@@ -45,7 +45,7 @@ Add the repository and dependency to your `pom.xml`:
 
 <dependencies>
     <dependency>
-        <groupId>com.github.1hendex</groupId>
+        <groupId>com.github.Darkness-Liquidation.DarknessAPI</groupId>
         <artifactId>DarknessAPI</artifactId>
         <version>Tag</version>
         <scope>provided</scope>
