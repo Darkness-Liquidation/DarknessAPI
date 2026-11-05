@@ -7,11 +7,22 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
+
 /**
  * Main API class for DarknessAC.
  * Provides convenient static methods for plugin integration.
  */
 public class DarknessAPI {
+
+    /**
+     * Checks if DarknessAPI has been loaded and initialized.
+     *
+     * @return true if initialized and ready to use, false otherwise
+     */
+    public static boolean isInitialized() {
+        return DarknessAPIProvider.isInitialized();
+    }
 
     /**
      * Registers a custom punishment animation.
@@ -59,15 +70,27 @@ public class DarknessAPI {
     }
 
     /**
-     * Gets a DarknessUser by player.
+     * Gets a DarknessUser by Bukkit player.
      *
      * @param player The Bukkit player
      * @return DarknessUser or null if not found
      */
     @Nullable
     public static DarknessUser getUser(@NotNull Player player) {
-        if (player == null) return null;
+        if (player == null || !isInitialized()) return null;
         return DarknessAPIProvider.get().getDarknessUser(player.getUniqueId());
+    }
+
+    /**
+     * Gets a DarknessUser by player UUID.
+     *
+     * @param uuid The player UUID
+     * @return DarknessUser or null if not found
+     */
+    @Nullable
+    public static DarknessUser getUser(@NotNull UUID uuid) {
+        if (uuid == null || !isInitialized()) return null;
+        return DarknessAPIProvider.get().getDarknessUser(uuid);
     }
 
     /**

@@ -26,6 +26,15 @@ public final class DarknessAPIProvider {
     }
 
     /**
+     * Checks if the DarknessAPI has been initialized.
+     *
+     * @return true if initialized, false otherwise
+     */
+    public static boolean isInitialized() {
+        return instance != null;
+    }
+
+    /**
      * Gets the DarknessAPI instance synchronously.
      *
      * @return The DarknessAbstractAPI instance.
