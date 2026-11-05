@@ -25,11 +25,53 @@ public interface DarknessUser extends ConfigReloadable, BasicReloadable, UserHan
     int getKeepAlivePing();
 
     String getVersionName();
+
+    /**
+     * @return Client network protocol version (e.g. 763 for 1.20, 47 for 1.8), or 0 if unknown.
+     */
+    default int getProtocolVersion() {
+        return 0;
+    }
+
     InetSocketAddress getAddress();
 
     double getHorizontalSensitivity();
 
     double getVerticalSensitivity();
+
+    /**
+     * Returns horizontal sensitivity converted to human-readable percentage (0 to 200%),
+     * matching the in-game Minecraft settings slider.
+     *
+     * @return sensitivity percentage (0 - 200%)
+     */
+    default int getHumanSensitivityX() {
+        return (int) Math.round(getHorizontalSensitivity() * 200.0);
+    }
+
+    /**
+     * Returns vertical sensitivity converted to human-readable percentage (0 to 200%),
+     * matching the in-game Minecraft settings slider.
+     *
+     * @return sensitivity percentage (0 - 200%)
+     */
+    default int getHumanSensitivityY() {
+        return (int) Math.round(getVerticalSensitivity() * 200.0);
+    }
+
+    /**
+     * @return The player's overall trust level (GREEN = clean, ORANGE = suspicious, RED = flagged/punished).
+     */
+    default TrustLevel getTrustLevel() {
+        return TrustLevel.GREEN;
+    }
+
+    /**
+     * @return Trust score from 0 (completely untrusted) to 100 (fully clean).
+     */
+    default int getTrustScore() {
+        return 100;
+    }
 
     default double getX() {
         return 0.0;
@@ -56,6 +98,23 @@ public interface DarknessUser extends ConfigReloadable, BasicReloadable, UserHan
     void updatePermissions();
 
     Collection<? extends AbstractCheck> getChecks();
+
+    /**
+     * Finds a check for this user by check name or alternative name.
+     *
+     * @param name Check name (e.g. "FlyA", "AimA", "KillAura")
+     * @return The check instance or null if not found
+     */
+    @Nullable
+    default AbstractCheck getCheck(String name) {
+        if (name == null) return null;
+        for (AbstractCheck check : getChecks()) {
+            if (name.equalsIgnoreCase(check.getCheckName()) || name.equalsIgnoreCase(check.getAlternativeName())) {
+                return check;
+            }
+        }
+        return null;
+    }
 
     /**
      * Runs the runnable on the player's netty thread. This may need to be used
