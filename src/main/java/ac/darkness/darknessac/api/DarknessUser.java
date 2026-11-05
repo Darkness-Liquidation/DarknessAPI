@@ -73,6 +73,15 @@ public interface DarknessUser extends ConfigReloadable, BasicReloadable, UserHan
         return 100;
     }
 
+    /**
+     * Returns the raw accumulated trust points for this user.
+     *
+     * @return Trust points count (0 = clean, higher = more suspicious)
+     */
+    default int getTrustPoints() {
+        return 0;
+    }
+
     default double getX() {
         return 0.0;
     }
