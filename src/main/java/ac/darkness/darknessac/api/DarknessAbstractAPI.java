@@ -73,4 +73,49 @@ public interface DarknessAbstractAPI extends ConfigReloadable, BasicReloadable {
     default void punish(UUID uuid, String reason) {}
 
     default void punish(String playerName, String reason) {}
+
+    default void setTempBypass(Player player, long seconds) {
+        DarknessUser user = getUser(player);
+        if (user != null) user.setTempBypass(seconds);
+    }
+
+    default void setTempBypassTicks(Player player, long ticks) {
+        DarknessUser user = getUser(player);
+        if (user != null) user.setTempBypassTicks(ticks);
+    }
+
+    default void setTempBypass(Player player, String checkName, long seconds) {
+        DarknessUser user = getUser(player);
+        if (user != null) user.setTempBypass(checkName, seconds);
+    }
+
+    default void setTempBypassTicks(Player player, String checkName, long ticks) {
+        DarknessUser user = getUser(player);
+        if (user != null) user.setTempBypassTicks(checkName, ticks);
+    }
+
+    default void setCategoryTempBypass(Player player, String category, long seconds) {
+        DarknessUser user = getUser(player);
+        if (user != null) user.setCategoryTempBypass(category, seconds);
+    }
+
+    default void setCategoryTempBypassTicks(Player player, String category, long ticks) {
+        DarknessUser user = getUser(player);
+        if (user != null) user.setCategoryTempBypassTicks(category, ticks);
+    }
+
+    default boolean isBypassing(Player player) {
+        DarknessUser user = getUser(player);
+        return user != null && user.isBypassing();
+    }
+
+    default boolean isBypassing(Player player, String checkName) {
+        DarknessUser user = getUser(player);
+        return user != null && user.isBypassing(checkName);
+    }
+
+    default double getTotalViolations(Player player) {
+        DarknessUser user = getUser(player);
+        return user != null ? user.getTotalViolations() : 0.0;
+    }
 }

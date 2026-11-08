@@ -102,24 +102,35 @@ import ac.darkness.darknessac.api.DarknessAPI;
 import ac.darkness.darknessac.api.DarknessUser;
 import org.bukkit.entity.Player;
 
+// Варіант 1: Через DarknessUser
 DarknessUser user = DarknessAPI.INSTANCE.getUser(player);
 if (user != null) {
-    // Надати тимчасовий імунітет від усіх перевірок на 5 секунд
+    // Імунітет від усіх перевірок на 5 секунд
     user.setTempBypass(5);
 
-    // Перевірити, чи гравець перебуває під обходом (тимчасовим або за правами)
-    if (user.isBypassing()) {
-        // Гравець ігнорується перевірками
-    }
+    // Точний імунітет у тіках (1 сек = 20 тіків, наприклад 30 тіків = 1.5 сек)
+    user.setTempBypassTicks(30);
 
-    // Перевірити, чи активний саме тимчасовий обхід
-    if (user.isTempBypassing()) {
-        // Тимчасовий імунітет активний
+    // Точковий імунітет для конкретної перевірки (наприклад Interpolation або Sprint)
+    user.setTempBypass("Interpolation", 3);
+    user.setTempBypassTicks("Sprint", 40);
+
+    // Точковий імунітет за категорією ("Movement", залишаючи Combat активним!)
+    user.setCategoryTempBypass("Movement", 3);
+
+    // Перевірити статус імунітету
+    if (user.isBypassing() || user.isBypassing("Interpolation")) {
+        // Гравець ігнорується перевірками
     }
 
     // Достроково скинути тимчасовий імунітет
     user.resetBypass();
 }
+
+// Варіант 2: Безпосередньо через DarknessAPI.INSTANCE в один рядок
+DarknessAPI.INSTANCE.setTempBypass(player, 5);
+DarknessAPI.INSTANCE.setCategoryTempBypass(player, "Movement", 3);
+DarknessAPI.INSTANCE.setTempBypassTicks(player, "Interpolation", 40);
 ```
 
 ---

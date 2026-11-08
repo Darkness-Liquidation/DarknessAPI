@@ -137,8 +137,42 @@ public interface DarknessUser extends ConfigReloadable, BasicReloadable, Darknes
 
     default void setTempBypass(long seconds) {}
 
+    default void setTempBypassTicks(long ticks) {
+        setTempBypass(Math.max(1L, ticks / 20L));
+    }
+
+    default void setTempBypass(String checkName, long seconds) {
+        setTempBypassTicks(checkName, seconds * 20L);
+    }
+
+    default void setTempBypassTicks(String checkName, long ticks) {
+        AbstractCheck check = getCheck(checkName);
+        if (check != null) {
+            check.setTempBypassTicks(ticks);
+        }
+    }
+
+    default void setCategoryTempBypass(String category, long seconds) {
+        setCategoryTempBypassTicks(category, seconds * 20L);
+    }
+
+    default void setCategoryTempBypassTicks(String category, long ticks) {
+        if (category == null) return;
+        for (AbstractCheck check : getChecks()) {
+            if (category.equalsIgnoreCase(check.getCategory())) {
+                check.setTempBypassTicks(ticks);
+            }
+        }
+    }
+
     default boolean isBypassing() {
         return false;
+    }
+
+    default boolean isBypassing(String checkName) {
+        if (isBypassing()) return true;
+        AbstractCheck check = getCheck(checkName);
+        return check != null && check.isBypassing();
     }
 
     default boolean isTempBypassing() {

@@ -1,5 +1,6 @@
 package ac.darkness.darknessac.api.events;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -18,6 +19,13 @@ public final class DarknessPunishWaveEvent extends Event implements Cancellable 
     private boolean cancelled = false;
 
     public DarknessPunishWaveEvent(@NotNull Collection<UUID> playerUUIDs, @NotNull Collection<Player> onlinePlayers) {
+        this(playerUUIDs, onlinePlayers, !Bukkit.isPrimaryThread());
+    }
+
+    public DarknessPunishWaveEvent(@NotNull Collection<UUID> playerUUIDs,
+                                   @NotNull Collection<Player> onlinePlayers,
+                                   boolean isAsync) {
+        super(isAsync);
         this.playerUUIDs = playerUUIDs;
         this.onlinePlayers = onlinePlayers;
     }

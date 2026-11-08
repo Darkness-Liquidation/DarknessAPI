@@ -102,24 +102,35 @@ import ac.darkness.darknessac.api.DarknessAPI;
 import ac.darkness.darknessac.api.DarknessUser;
 import org.bukkit.entity.Player;
 
+// Вариант 1: Через DarknessUser
 DarknessUser user = DarknessAPI.INSTANCE.getUser(player);
 if (user != null) {
-    // Выдать временный иммунитет от всех проверок на 5 секунд
+    // Иммунитет от всех проверок на 5 секунд
     user.setTempBypass(5);
 
-    // Проверить, находится ли игрок под обходом (временным или по правам)
-    if (user.isBypassing()) {
-        // Игрок игнорируется проверками
-    }
+    // Точный иммунитет в тиках (1 сек = 20 тиков, например 30 тиков = 1.5 сек)
+    user.setTempBypassTicks(30);
 
-    // Проверить, активен ли именно временный обход
-    if (user.isTempBypassing()) {
-        // Временный иммунитет активен
+    // Точечный иммунитет для конкретного чека (например Interpolation или Sprint)
+    user.setTempBypass("Interpolation", 3);
+    user.setTempBypassTicks("Sprint", 40);
+
+    // Точечный иммунитет по категории ("Movement", оставляя Combat активным!)
+    user.setCategoryTempBypass("Movement", 3);
+
+    // Проверить статус иммунитета
+    if (user.isBypassing() || user.isBypassing("Interpolation")) {
+        // Игрок игнорируется проверками
     }
 
     // Досрочно сбросить временный иммунитет
     user.resetBypass();
 }
+
+// Вариант 2: Напрямую через DarknessAPI.INSTANCE в одну строку
+DarknessAPI.INSTANCE.setTempBypass(player, 5);
+DarknessAPI.INSTANCE.setCategoryTempBypass(player, "Movement", 3);
+DarknessAPI.INSTANCE.setTempBypassTicks(player, "Interpolation", 40);
 ```
 
 ---
@@ -180,6 +191,9 @@ public class DetectionListener implements Listener {
         String check = event.getFullCheckName(); // "AutoAction.A" (автореспаун)
         double vl = event.getViolations();
         String verbose = event.getVerbose();
+        int ping = event.getPing(); // Пинг игрока
+
+        DarknessUser user = event.getUser(); // Прямой доступ к DarknessUser
 
         // Отменить флаг в зоне мини-игры
         if (event.getPlayer().getWorld().getName().equals("pvp_arena")) {

@@ -8,6 +8,10 @@ public interface AbstractCheck extends AbstractProcessor {
         return getCheckName();
     }
 
+    default String getCategory() {
+        return "Other";
+    }
+
     double getViolations();
 
     default void resetViolations() {}
@@ -51,4 +55,14 @@ public interface AbstractCheck extends AbstractProcessor {
     }
 
     default void setEnabled(boolean enabled) {}
+
+    default void setTempBypassTicks(long ticks) {}
+
+    default void setTempBypass(long seconds) {
+        setTempBypassTicks(seconds * 20L);
+    }
+
+    default boolean isBypassing() {
+        return !isEnabled();
+    }
 }

@@ -102,24 +102,35 @@ import ac.darkness.darknessac.api.DarknessAPI;
 import ac.darkness.darknessac.api.DarknessUser;
 import org.bukkit.entity.Player;
 
+// Option 1: Via DarknessUser
 DarknessUser user = DarknessAPI.INSTANCE.getUser(player);
 if (user != null) {
-    // Grant temporary immunity from all checks for 5 seconds
+    // Immunity from all checks for 5 seconds
     user.setTempBypass(5);
 
-    // Check if player currently bypasses checks (temporary or permission)
-    if (user.isBypassing()) {
-        // Player is exempted
+    // Precise immunity in ticks (1 sec = 20 ticks, e.g. 30 ticks = 1.5 sec)
+    user.setTempBypassTicks(30);
+
+    // Specific immunity for a single check (e.g. Interpolation or Sprint)
+    user.setTempBypass("Interpolation", 3);
+    user.setTempBypassTicks("Sprint", 40);
+
+    // Specific immunity by category ("Movement", keeping Combat active!)
+    user.setCategoryTempBypass("Movement", 3);
+
+    // Check bypass status
+    if (user.isBypassing() || user.isBypassing("Interpolation")) {
+        // Player is ignored by checks
     }
 
-    // Check if player has an active temporary bypass
-    if (user.isTempBypassing()) {
-        // Player has temporary immunity
-    }
-
-    // Cancel / reset bypass immediately
+    // Prematurely reset temporary immunity
     user.resetBypass();
 }
+
+// Option 2: Directly via DarknessAPI.INSTANCE in one line
+DarknessAPI.INSTANCE.setTempBypass(player, 5);
+DarknessAPI.INSTANCE.setCategoryTempBypass(player, "Movement", 3);
+DarknessAPI.INSTANCE.setTempBypassTicks(player, "Interpolation", 40);
 ```
 
 ---
