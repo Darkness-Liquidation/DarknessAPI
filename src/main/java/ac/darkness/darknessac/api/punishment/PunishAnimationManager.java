@@ -20,7 +20,7 @@ public class PunishAnimationManager {
      * Internal animation executor used by {@link AnimationMode}.
      * Typically set by the Darkness core plugin on startup.
      */
-    @Getter @Setter
+    @Setter @Getter
     private static volatile AnimationExecutor executor;
 
     /**

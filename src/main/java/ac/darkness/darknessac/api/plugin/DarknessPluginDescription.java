@@ -5,9 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 
 public interface DarknessPluginDescription {
-    String getVersion();
+    String version();
 
-    String getDescription();
+    String description();
 
-    public @NotNull Collection<String> getAuthors();
+    public @NotNull Collection<String> authors();
 }

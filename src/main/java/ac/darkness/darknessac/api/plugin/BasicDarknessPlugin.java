@@ -32,31 +32,12 @@ public class BasicDarknessPlugin implements DarknessPlugin {
         return dataFolder;
     }
 
-    private static class BasicDarknessPluginDescription implements DarknessPluginDescription {
-
-        private final String version;
-        private final String description;
-        private final Collection<String> authors;
-
-        public BasicDarknessPluginDescription(String version, String description, Collection<String> authors) {
-            this.version = version;
-            this.description = description;
-            this.authors = authors;
-        }
+    private record BasicDarknessPluginDescription(String version, String description,
+                                                  Collection<String> authors) implements DarknessPluginDescription {
 
         @Override
-        public String getVersion() {
-            return version;
+            public @NotNull Collection<String> authors() {
+                return authors;
+            }
         }
-
-        @Override
-        public String getDescription() {
-            return description;
-        }
-
-        @Override
-        public @NotNull Collection<String> getAuthors() {
-            return authors;
-        }
-    }
 }
