@@ -65,4 +65,12 @@ public interface AbstractCheck extends AbstractProcessor {
     default boolean isBypassing() {
         return !isEnabled();
     }
+
+    default boolean isTempBypassing() {
+        return false;
+    }
+
+    default void resetBypass() {
+        setTempBypass(0);
+    }
 }
