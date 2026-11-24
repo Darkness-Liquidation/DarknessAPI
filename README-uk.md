@@ -1,6 +1,6 @@
 <div align="center">
   <h1>DarknessAPI</h1>
-  <p>Офіційний кросплатформний API для античіта Darkness Anticheat.</p>
+  <p>Офіційний кросплатформний API для Darkness Liquidation.</p>
 
   <p>
     <a href="https://dsc.gg/darkness-liquidation">

@@ -1,6 +1,6 @@
 <div align="center">
   <h1>DarknessAPI</h1>
-  <p>The official modern, cross-platform developer API for Darkness Anticheat.</p>
+  <p>The official modern, cross-platform developer API for Darkness Liquidation.</p>
 
   <p>
     <a href="https://dsc.gg/darkness-liquidation">
