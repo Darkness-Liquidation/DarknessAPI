@@ -115,22 +115,22 @@ public interface DarknessAbstractAPI extends ConfigReloadable, BasicReloadable {
         if (user != null) user.setTempBypassTicks(ticks);
     }
 
-    default void setTempBypass(Player player, String checkName, long seconds) {
-        if (player != null) setTempBypass(player.getUniqueId(), checkName, seconds);
+    default void setTempBypass(Player player, CheckType checkType, long seconds) {
+        if (player != null && checkType != null) setTempBypass(player.getUniqueId(), checkType, seconds);
     }
 
-    default void setTempBypass(UUID uuid, String checkName, long seconds) {
+    default void setTempBypass(UUID uuid, CheckType checkType, long seconds) {
         DarknessUser user = getUser(uuid);
-        if (user != null) user.setTempBypass(checkName, seconds);
+        if (user != null) user.setTempBypass(checkType, seconds);
     }
 
-    default void setTempBypassTicks(Player player, String checkName, long ticks) {
-        if (player != null) setTempBypassTicks(player.getUniqueId(), checkName, ticks);
+    default void setTempBypassTicks(Player player, CheckType checkType, long ticks) {
+        if (player != null && checkType != null) setTempBypassTicks(player.getUniqueId(), checkType, ticks);
     }
 
-    default void setTempBypassTicks(UUID uuid, String checkName, long ticks) {
+    default void setTempBypassTicks(UUID uuid, CheckType checkType, long ticks) {
         DarknessUser user = getUser(uuid);
-        if (user != null) user.setTempBypassTicks(checkName, ticks);
+        if (user != null) user.setTempBypassTicks(checkType, ticks);
     }
 
     default void setCategoryTempBypass(Player player, CheckCategory category, long seconds) {
@@ -160,13 +160,13 @@ public interface DarknessAbstractAPI extends ConfigReloadable, BasicReloadable {
         return user != null && user.isBypassing();
     }
 
-    default boolean isBypassing(Player player, String checkName) {
-        return player != null && isBypassing(player.getUniqueId(), checkName);
+    default boolean isBypassing(Player player, CheckType checkType) {
+        return player != null && checkType != null && isBypassing(player.getUniqueId(), checkType);
     }
 
-    default boolean isBypassing(UUID uuid, String checkName) {
+    default boolean isBypassing(UUID uuid, CheckType checkType) {
         DarknessUser user = getUser(uuid);
-        return user != null && user.isBypassing(checkName);
+        return user != null && user.isBypassing(checkType);
     }
 
     default boolean isBypassing(Player player, CheckCategory category) {
@@ -210,15 +210,15 @@ public interface DarknessAbstractAPI extends ConfigReloadable, BasicReloadable {
             }
 
             @Override
-            public void setTempBypass(@NotNull UUID uuid, @NotNull String checkName, long seconds) {
+            public void setTempBypass(@NotNull UUID uuid, @NotNull CheckType checkType, long seconds) {
                 DarknessUser user = getUser(uuid);
-                if (user != null) user.setTempBypass(checkName, seconds);
+                if (user != null) user.setTempBypass(checkType, seconds);
             }
 
             @Override
-            public void setTempBypassTicks(@NotNull UUID uuid, @NotNull String checkName, long ticks) {
+            public void setTempBypassTicks(@NotNull UUID uuid, @NotNull CheckType checkType, long ticks) {
                 DarknessUser user = getUser(uuid);
-                if (user != null) user.setTempBypassTicks(checkName, ticks);
+                if (user != null) user.setTempBypassTicks(checkType, ticks);
             }
 
             @Override
@@ -240,9 +240,9 @@ public interface DarknessAbstractAPI extends ConfigReloadable, BasicReloadable {
             }
 
             @Override
-            public boolean isBypassing(@NotNull UUID uuid, @NotNull String checkName) {
+            public boolean isBypassing(@NotNull UUID uuid, @NotNull CheckType checkType) {
                 DarknessUser user = getUser(uuid);
-                return user != null && user.isBypassing(checkName);
+                return user != null && user.isBypassing(checkType);
             }
 
             @Override

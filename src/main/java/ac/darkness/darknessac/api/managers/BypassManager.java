@@ -1,6 +1,7 @@
 package ac.darkness.darknessac.api.managers;
 
 import ac.darkness.darknessac.api.CheckCategory;
+import ac.darkness.darknessac.api.CheckType;
 import ac.darkness.darknessac.api.DarknessIdentity;
 import ac.darkness.darknessac.api.annotation.ThreadSafe;
 import org.bukkit.entity.Player;
@@ -35,24 +36,24 @@ public interface BypassManager {
         setTempBypassTicks(identity.getUniqueId(), ticks);
     }
 
-    void setTempBypass(@NotNull UUID uuid, @NotNull String checkName, long seconds);
+    void setTempBypass(@NotNull UUID uuid, @NotNull CheckType checkType, long seconds);
 
-    default void setTempBypass(@NotNull Player player, @NotNull String checkName, long seconds) {
-        setTempBypass(player.getUniqueId(), checkName, seconds);
+    default void setTempBypass(@NotNull Player player, @NotNull CheckType checkType, long seconds) {
+        setTempBypass(player.getUniqueId(), checkType, seconds);
     }
 
-    default void setTempBypass(@NotNull DarknessIdentity identity, @NotNull String checkName, long seconds) {
-        setTempBypass(identity.getUniqueId(), checkName, seconds);
+    default void setTempBypass(@NotNull DarknessIdentity identity, @NotNull CheckType checkType, long seconds) {
+        setTempBypass(identity.getUniqueId(), checkType, seconds);
     }
 
-    void setTempBypassTicks(@NotNull UUID uuid, @NotNull String checkName, long ticks);
+    void setTempBypassTicks(@NotNull UUID uuid, @NotNull CheckType checkType, long ticks);
 
-    default void setTempBypassTicks(@NotNull Player player, @NotNull String checkName, long ticks) {
-        setTempBypassTicks(player.getUniqueId(), checkName, ticks);
+    default void setTempBypassTicks(@NotNull Player player, @NotNull CheckType checkType, long ticks) {
+        setTempBypassTicks(player.getUniqueId(), checkType, ticks);
     }
 
-    default void setTempBypassTicks(@NotNull DarknessIdentity identity, @NotNull String checkName, long ticks) {
-        setTempBypassTicks(identity.getUniqueId(), checkName, ticks);
+    default void setTempBypassTicks(@NotNull DarknessIdentity identity, @NotNull CheckType checkType, long ticks) {
+        setTempBypassTicks(identity.getUniqueId(), checkType, ticks);
     }
 
     void setCategoryTempBypass(@NotNull UUID uuid, @NotNull CheckCategory category, long seconds);
@@ -85,14 +86,14 @@ public interface BypassManager {
         return isBypassing(identity.getUniqueId());
     }
 
-    boolean isBypassing(@NotNull UUID uuid, @NotNull String checkName);
+    boolean isBypassing(@NotNull UUID uuid, @NotNull CheckType checkType);
 
-    default boolean isBypassing(@NotNull Player player, @NotNull String checkName) {
-        return isBypassing(player.getUniqueId(), checkName);
+    default boolean isBypassing(@NotNull Player player, @NotNull CheckType checkType) {
+        return isBypassing(player.getUniqueId(), checkType);
     }
 
-    default boolean isBypassing(@NotNull DarknessIdentity identity, @NotNull String checkName) {
-        return isBypassing(identity.getUniqueId(), checkName);
+    default boolean isBypassing(@NotNull DarknessIdentity identity, @NotNull CheckType checkType) {
+        return isBypassing(identity.getUniqueId(), checkType);
     }
 
     boolean isBypassing(@NotNull UUID uuid, @NotNull CheckCategory category);

@@ -44,7 +44,7 @@
 6. **Кінематографічні анімації бану (`AnimationMode`) без костилів**
    Хочете ефектно покарати чітера (вихор вогню, удари грому, левітація в повітрі)? Забудьте про спагеті з `BukkitRunnable`, таймерів та ручного заморожування гравця. Darkness автоматично ставить на паузу перевірки та рух, надає готові методи `onStart`, `onTick(step)`, `onFinish` і сам виконує команди бану після завершення.
 7. **Асинхронність, Folia, безпека типів та Optional**
-   Повна незалежність від Bukkit `Player`: всі методи перевантажені під `UUID` та `DarknessIdentity` для безпечного виклику з асинхронних потоків. Методи `findUser(player)` та `findCheck(name)` повертають `Optional`, дозволяючи писати лаконічний код без постійних `if (user != null)`. Категорії перевірок типізовані через `CheckCategory`.
+   Повна незалежність від Bukkit `Player`: всі методи перевантажені під `UUID` та `DarknessIdentity` для безпечного виклику з асинхронних потоків. Методи `findUser(player)` та `findCheck(name)` повертають `Optional`, дозволяючи писати лаконічний код без постійних `if (user != null)`. Категорії та типи перевірок строго типізовані через `CheckCategory` та `CheckType`.
 
 ---
 
@@ -124,6 +124,7 @@ dependencies {
 
 ```java
 import ac.darkness.darknessac.api.CheckCategory;
+import ac.darkness.darknessac.api.CheckType;
 import ac.darkness.darknessac.api.DarknessAPI;
 import ac.darkness.darknessac.api.managers.BypassManager;
 import org.bukkit.entity.Player;
@@ -140,9 +141,9 @@ bypass.setCategoryTempBypassTicks(player, CheckCategory.MOVEMENT, 40);
 UUID uuid = player.getUniqueId();
 bypass.setCategoryTempBypassTicks(uuid, CheckCategory.MOVEMENT, 40);
 
-// 2. Імунітет лише для одного конкретного чека (наприклад, Sprint або Interpolation)
-bypass.setTempBypassTicks(player, "Sprint", 30);
-bypass.setTempBypassTicks(uuid, "Sprint", 30);
+// 2. Точковий імунітет за типом перевірки (наприклад, CheckType.SPRINT)
+bypass.setTempBypassTicks(player, CheckType.SPRINT, 30);
+bypass.setTempBypassTicks(uuid, CheckType.SPRINT, 30);
 
 // 3. Повний тимчасовий імунітет на час катсцени (в секундах)
 bypass.setTempBypass(player, 5);

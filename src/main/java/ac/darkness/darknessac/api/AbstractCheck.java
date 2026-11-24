@@ -12,6 +12,14 @@ public interface AbstractCheck extends AbstractProcessor {
         return CheckCategory.OTHER;
     }
 
+    default CheckType getType() {
+        return CheckType.fromString(getCheckName());
+    }
+
+    default CheckType getCheckType() {
+        return getType();
+    }
+
     double getViolations();
 
     default void resetViolations() {}

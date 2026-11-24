@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.github.Darkness-Liquidation"
-version = "1.1.0"
+version = "1.1.1"
 description = "DarknessAPI"
 
 java {
@@ -37,7 +37,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "com.github.Darkness-Liquidation"
             artifactId = "DarknessAPI"
-            version = "1.1.0"
+            version = "1.1.1"
             from(components["java"])
         }
     }

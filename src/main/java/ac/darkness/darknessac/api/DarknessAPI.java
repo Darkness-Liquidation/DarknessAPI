@@ -161,12 +161,40 @@ public final class DarknessAPI {
         return getBypassManager().isBypassing(identity);
     }
 
-    public static boolean isBypassing(@NotNull Player player, @NotNull String checkName) {
-        return getBypassManager().isBypassing(player, checkName);
+    public static void setTempBypass(@NotNull Player player, @NotNull CheckType checkType, long seconds) {
+        getBypassManager().setTempBypass(player, checkType, seconds);
     }
 
-    public static boolean isBypassing(@NotNull UUID uuid, @NotNull String checkName) {
-        return getBypassManager().isBypassing(uuid, checkName);
+    public static void setTempBypass(@NotNull UUID uuid, @NotNull CheckType checkType, long seconds) {
+        getBypassManager().setTempBypass(uuid, checkType, seconds);
+    }
+
+    public static void setTempBypass(@NotNull DarknessIdentity identity, @NotNull CheckType checkType, long seconds) {
+        getBypassManager().setTempBypass(identity, checkType, seconds);
+    }
+
+    public static void setTempBypassTicks(@NotNull Player player, @NotNull CheckType checkType, long ticks) {
+        getBypassManager().setTempBypassTicks(player, checkType, ticks);
+    }
+
+    public static void setTempBypassTicks(@NotNull UUID uuid, @NotNull CheckType checkType, long ticks) {
+        getBypassManager().setTempBypassTicks(uuid, checkType, ticks);
+    }
+
+    public static void setTempBypassTicks(@NotNull DarknessIdentity identity, @NotNull CheckType checkType, long ticks) {
+        getBypassManager().setTempBypassTicks(identity, checkType, ticks);
+    }
+
+    public static boolean isBypassing(@NotNull Player player, @NotNull CheckType checkType) {
+        return getBypassManager().isBypassing(player, checkType);
+    }
+
+    public static boolean isBypassing(@NotNull UUID uuid, @NotNull CheckType checkType) {
+        return getBypassManager().isBypassing(uuid, checkType);
+    }
+
+    public static boolean isBypassing(@NotNull DarknessIdentity identity, @NotNull CheckType checkType) {
+        return getBypassManager().isBypassing(identity, checkType);
     }
 
     public static boolean isBypassing(@NotNull Player player, @NotNull CheckCategory category) {

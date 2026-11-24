@@ -44,7 +44,7 @@ Most anticheat APIs only offer basic alert forwarding. **DarknessAPI** is design
 6. **Zero-Boilerplate Cinematic Ban Animations (`AnimationMode`)**
    Want to punish cheaters with lightning strikes, flame vortices, and levitation? Skip messy `BukkitRunnable` chains, manual tick tracking, and player freeze logic. Darkness handles check pausing, levitation, and executes punishment commands automatically once the animation finishes.
 7. **Async, Folia, Type-Safety & Optional**
-   Complete independence from Bukkit `Player`: all methods are overloaded for `UUID` and `DarknessIdentity` for safe execution from asynchronous threads and cross-platform readiness. Methods such as `findUser(player)` and `findCheck(name)` return `Optional`, enabling clean functional code without repetitive null checks. Check categories are strongly typed via `CheckCategory`.
+   Complete independence from Bukkit `Player`: all methods are overloaded for `UUID` and `DarknessIdentity` for safe execution from asynchronous threads and cross-platform readiness. Methods such as `findUser(player)` and `findCheck(name)` return `Optional`, enabling clean functional code without repetitive null checks. Check categories and types are strongly typed via `CheckCategory` and `CheckType`.
 
 ---
 
@@ -124,6 +124,7 @@ Access the API via the `DarknessAPI` singleton:
 
 ```java
 import ac.darkness.darknessac.api.CheckCategory;
+import ac.darkness.darknessac.api.CheckType;
 import ac.darkness.darknessac.api.DarknessAPI;
 import ac.darkness.darknessac.api.managers.BypassManager;
 import org.bukkit.entity.Player;
@@ -140,9 +141,9 @@ bypass.setCategoryTempBypassTicks(player, CheckCategory.MOVEMENT, 40);
 UUID uuid = player.getUniqueId();
 bypass.setCategoryTempBypassTicks(uuid, CheckCategory.MOVEMENT, 40);
 
-// 2. Specific immunity for a single check (e.g. Sprint or Interpolation)
-bypass.setTempBypassTicks(player, "Sprint", 30);
-bypass.setTempBypassTicks(uuid, "Sprint", 30);
+// 2. Specific immunity for a check type (e.g. CheckType.SPRINT)
+bypass.setTempBypassTicks(player, CheckType.SPRINT, 30);
+bypass.setTempBypassTicks(uuid, CheckType.SPRINT, 30);
 
 // 3. Full temporary immunity during cinematic cutscenes (in seconds)
 bypass.setTempBypass(player, 5);

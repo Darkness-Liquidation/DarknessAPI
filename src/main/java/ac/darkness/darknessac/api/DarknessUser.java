@@ -152,14 +152,16 @@ public interface DarknessUser extends ConfigReloadable, BasicReloadable, Darknes
         setTempBypass(Math.max(1L, ticks / 20L));
     }
 
-    default void setTempBypass(String checkName, long seconds) {
-        setTempBypassTicks(checkName, seconds * 20L);
+    default void setTempBypass(CheckType checkType, long seconds) {
+        setTempBypassTicks(checkType, seconds * 20L);
     }
 
-    default void setTempBypassTicks(String checkName, long ticks) {
-        AbstractCheck check = getCheck(checkName);
-        if (check != null) {
-            check.setTempBypassTicks(ticks);
+    default void setTempBypassTicks(CheckType checkType, long ticks) {
+        if (checkType == null) return;
+        for (AbstractCheck check : getChecks()) {
+            if (check.getType() == checkType) {
+                check.setTempBypassTicks(ticks);
+            }
         }
     }
 
@@ -180,10 +182,15 @@ public interface DarknessUser extends ConfigReloadable, BasicReloadable, Darknes
         return false;
     }
 
-    default boolean isBypassing(String checkName) {
+    default boolean isBypassing(CheckType checkType) {
+        if (checkType == null) return false;
         if (isBypassing()) return true;
-        AbstractCheck check = getCheck(checkName);
-        return check != null && check.isBypassing();
+        for (AbstractCheck check : getChecks()) {
+            if (check.getType() == checkType && check.isBypassing()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     default boolean isBypassing(CheckCategory category) {
