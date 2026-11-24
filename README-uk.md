@@ -1,6 +1,6 @@
 <div align="center">
   <h1>DarknessAPI</h1>
-  <p>Офіційний сучасний кросплатформний API для античита Darkness.</p>
+  <p>Офіційний кросплатформний API для Darkness Liquidation.</p>
 
   <p>
     <a href="https://dsc.gg/darkness-liquidation">
@@ -10,6 +10,9 @@
     <img alt="Platform Paper and Folia" src="https://img.shields.io/badge/Platform-Paper%20%2F%20Folia-FFFFFF?style=flat&logo=papermc&logoColor=black">
     <a href="https://jitpack.io/#Darkness-Liquidation/DarknessAPI">
       <img alt="JitPack" src="https://jitpack.io/v/Darkness-Liquidation/DarknessAPI.svg">
+    </a>
+    <a href="https://github.com/Darkness-Liquidation/DarknessExample">
+      <img alt="Example" src="https://img.shields.io/badge/Example-DarknessExample-blue?style=flat&logo=github">
     </a>
   </p>
 
@@ -24,26 +27,30 @@
 
 ---
 
-### Що таке DarknessAPI?
+### Навіщо потрібен DarknessAPI? Реальні завдання сервера
 
-DarknessAPI — офіційний інтерфейс для розробників сторонніх плагінів, міні-ігор та систем адміністрування. Забезпечує чисту, потокобезпечну архітектуру з чітким розділенням відповідальності та гарантією зворотної сумісності.
+Більшість античіт-API обмежуються простим пересиланням сповіщень у чат. **DarknessAPI** розроблений як практичний інструмент для творців серверів, міні-ігор та плагінів, що вирішує реальні проблеми інтеграції:
 
-Основні можливості:
-- **Спеціалізовані менеджери**: інтерфейси з єдиною відповідальністю (`UserManager`, `BypassManager`, `ViolationManager`, `PunishmentManager`, `AlertManager`).
-- **Гранулярний Temp Bypass**: тимчасовий імунітет глобально, за категоріями (`Combat`, `Movement`, `World`) або за назвою чека для скілів, джетпаків, батутів та крюків.
-- **Безпечне керування VL**: читання агрегованої телеметрії та безпечне скидання порушень без порушення математичних буферів перевірок.
-- **Асинхронність та сумісність з Folia**: чіткі контракти потокобезпеки (`@ThreadSafe`, `@RegionThreadOnly`) та асинхронні методи на основі `CompletableFuture`.
-- **Події Bukkit / Folia**: перехоплення детектів, скасування помилкових спрацьовувань на PvP-аренах, модифікація причин покарання та перехоплення хвиль банів.
-- **Кастомні анімації покарань**: створення кінематографічних анімацій бану з ефектами часток та звуками.
-
-### Вимоги
-
-- Java 17 або новіша.
-- Сервер Paper, Purpur або Folia із встановленим Darkness Anticheat.
+1. **Виправлення помилкових спрацьовувань від сторонніх плагінів**
+   Кастомні скіли (ривки, деші), батути, джетпаки, крюки-кішки або телепортації часто ламають фізику Minecraft і викликають помилкові флаги перевірок руху (`Speed`, `Fly`, `Sprint`). За допомогою `BypassManager` ви можете надати точковий імунітет на пару тіків або секунд лише для категорії `CheckCategory.MOVEMENT`, залишивши бойові перевірки (`CheckCategory.COMBAT`) повністю активними! Типобезпечний `enum CheckCategory` захищає від помилок у рядках.
+2. **Trust Factor (Фактор довіри) для підбору гравців та санкцій**
+   Вбудована система очок і рівнів довіри (`TrustLevel.GREEN`, `ORANGE`, `RED`). Використовуйте її для **Matchmaking як у CS2** (підозрілі гравці грають лише з підозрілими в ізольованому пулі дуелей чи міні-ігор) або для динамічних обмежень (збільшений кулдаун на команди, блокування торгівлі, обов'язковий лог у PvP).
+3. **Керування буфером перевірок (`Buffer`) та безпечне скидання VL**
+   Якщо за специфічних умов вашої кастомної механіки (наприклад, особливий блок або кастомний транспорт) чек починає накопичувати підозру — ви можете на льоту скинути його внутрішній буфер у `0.0`, миттєво запобігши помилковому кіку чи флагу. А якщо ваша власна логіка виявила чітера — викличте флаг античіта одним рядком.
+4. **Глибока телеметрія для модераторів та скорбордів**
+   Отримуйте реальну чутливість миші гравця в людських відсотках (`0-200%`), бренд клієнта (Lunar Client, Badlion, Feather, Vanilla), пінг за транзакціями та **повний список перевірок, які гравець флагав** (наприклад, `Interpolation (A) — 32 VL`). Це дозволяє виводити статистику модераторам у скорборд, таб або GUI для пріоритизації нагляду.
+5. **Керування флагами та сетбеками (`DarknessViolationEvent`, `DarknessSetbackEvent`)**
+   На спавні встановлені декоративні батути або швидкісні ліфти? Перехопіть `DarknessViolationEvent` і скасуйте детектування в мирних регіонах. На сервері є кастомний паркур або міні-ігри? Перехопіть `DarknessSetbackEvent` і скасуйте відкат гравця назад, зберігши запис флагу в логах для модераторів.
+6. **Кінематографічні анімації бану (`AnimationMode`) без костилів**
+   Хочете ефектно покарати чітера (вихор вогню, удари грому, левітація в повітрі)? Забудьте про спагеті з `BukkitRunnable`, таймерів та ручного заморожування гравця. Darkness автоматично ставить на паузу перевірки та рух, надає готові методи `onStart`, `onTick(step)`, `onFinish` і сам виконує команди бану після завершення.
+7. **Асинхронність, Folia, безпека типів та Optional**
+   Повна незалежність від Bukkit `Player`: всі методи перевантажені під `UUID` та `DarknessIdentity` для безпечного виклику з асинхронних потоків. Методи `findUser(player)` та `findCheck(name)` повертають `Optional`, дозволяючи писати лаконічний код без постійних `if (user != null)`. Категорії та типи перевірок строго типізовані через `CheckCategory` та `CheckType`.
 
 ---
 
-### Підключення залежності (SemVer 2.0.0)
+### Підключення залежності (JitPack)
+
+DarknessAPI публікується через JitPack:
 
 #### Gradle (Kotlin DSL)
 
@@ -54,7 +61,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.Darkness-Liquidation:DarknessAPI:%version%")
+    compileOnly("com.github.Darkness-Liquidation:DarknessAPI:1.1.0")
 }
 ```
 
@@ -67,7 +74,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.Darkness-Liquidation:DarknessAPI:%version%'
+    compileOnly 'com.github.Darkness-Liquidation:DarknessAPI:1.1.0'
 }
 ```
 
@@ -85,7 +92,7 @@ dependencies {
     <dependency>
         <groupId>com.github.Darkness-Liquidation</groupId>
         <artifactId>DarknessAPI</artifactId>
-        <version>%version%</version>
+        <version>1.1.0</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -93,164 +100,241 @@ dependencies {
 
 ---
 
-### Архітектура та менеджери
+### Архітектура та спеціалізовані менеджери
 
-DarknessAPI розділяє обов'язки за незалежними менеджерами, зберігаючи зручні статичні виклики для зворотної сумісності:
+Доступ до API здійснюється через синглтон `DarknessAPI`:
 
 | Менеджер | Призначення | Потокобезпека |
 | :--- | :--- | :--- |
-| `UserManager` | Резолв сесій гравців (`DarknessUser`) та асинхронні запити | `@ThreadSafe` |
-| `BypassManager` | Глобальні, категорійні та чекові тимчасові байпаси | `@ThreadSafe` |
-| `ViolationManager` | Метрики порушень, інспекція чеків та безпечне скидання VL | `@ThreadSafe` |
-| `PunishmentManager` | Виконання покарань, хуки хвиль банів та анімації | `@ThreadSafe` |
-| `AlertManager` | Відправлення сповіщень персоналу з правами | `@ThreadSafe` |
+| `BypassManager` | Тимчасовий точковий імунітет (глобально, за категорією, за назвою чека) | `@ThreadSafe` |
+| `UserManager` | Сесії гравців (`DarknessUser`), телеметрія, чутливість, траст-фактор | `@ThreadSafe` |
+| `ViolationManager` | Метрики порушень, інспекція чеків, скидання VL та симуляція флагів | `@ThreadSafe` |
+| `PunishmentManager` | Виконання покарань, хуки хвиль банів та реєстрація кастомних анімацій | `@ThreadSafe` |
+| `AlertManager` | Керування підпискою персоналу на сповіщення та системні повідомлення | `@ThreadSafe` |
 
 ---
 
-### 1. Тимчасовий імунітет (`BypassManager`)
+### Практичні сценарії використання
+
+#### Сценарій 1: Фікс помилкових спрацьовувань від скілів та предметів (`BypassManager`)
+
+**Проблема**: Гравець активує скіл "Ривок", кастомний джетпак або наступає на батут. Античіт фіксує неприродну швидкість і викликає флаги `Speed` або `Fly`. Вимикати весь античіт небезпечно — чітер може активувати KillAura під час скіла.
+
+**Рішення**: Надаємо тимчасовий імунітет лише для категорії `CheckCategory.MOVEMENT` або для конкретної перевірки на точну кількість тіків:
 
 ```java
+import ac.darkness.darknessac.api.CheckCategory;
+import ac.darkness.darknessac.api.CheckType;
 import ac.darkness.darknessac.api.DarknessAPI;
 import ac.darkness.darknessac.api.managers.BypassManager;
 import org.bukkit.entity.Player;
+import java.util.UUID;
 
 BypassManager bypass = DarknessAPI.getBypassManager();
 
-// Імунітет від усіх перевірок на 5 секунд
+// 1. Точний імунітет у тіках (40 тіків = рівно 2 секунди) на категорію руху.
+// Типобезпечний CheckCategory виключає помилки на кшталт "movement"!
+// Бойові перевірки (Combat) продовжують карати чітерів!
+bypass.setCategoryTempBypassTicks(player, CheckCategory.MOVEMENT, 40);
+
+// Безпечний виклик за UUID (зручно для асинхронних потоків та незалежності від Player):
+UUID uuid = player.getUniqueId();
+bypass.setCategoryTempBypassTicks(uuid, CheckCategory.MOVEMENT, 40);
+
+// 2. Точковий імунітет за типом перевірки (наприклад, CheckType.SPRINT)
+bypass.setTempBypassTicks(player, CheckType.SPRINT, 30);
+bypass.setTempBypassTicks(uuid, CheckType.SPRINT, 30);
+
+// 3. Повний тимчасовий імунітет на час катсцени (в секундах)
 bypass.setTempBypass(player, 5);
 
-// Точний імунітет у серверних тіках (30 тіків = 1.5 секунди)
-bypass.setTempBypassTicks(player, 30);
-
-// Імунітет тільки для конкретної перевірки (Sprint або Interpolation)
-bypass.setTempBypass(player, "Interpolation", 3);
-bypass.setTempBypassTicks(player, "Sprint", 40);
-
-// Імунітет для всієї категорії ("movement", залишаючи бойові перевірки активними!)
-bypass.setCategoryTempBypass(player, "movement", 3);
-
-// Перевірка статусу імунітету
-if (bypass.isBypassing(player) || bypass.isBypassing(player, "Interpolation")) {
-    // Гравець перебуває під імунітетом
+// 4. Перевірка статусу імунітету
+if (bypass.isBypassing(player, CheckCategory.MOVEMENT)) {
+    // У гравця тимчасово вимкнено перевірки руху
 }
 
-// Дострокове скидання імунітету
+// 5. Динамічний предикат байпасу (без підрахунку тіків та ручного скидання!):
+// Приклад: перевірки руху вимкнено, поки гравець летить на кастомному драконі
+DarknessAPI.registerBypassPredicate(CheckCategory.MOVEMENT, p -> isFlyingDragon(p));
+
+// 6. Дострокове скидання тимчасового байпасу (наприклад, якщо скіл перервали оглушенням)
 bypass.resetBypass(player);
 ```
 
-> **Семантика байпасу**: Повторний виклик `setTempBypass` оновлює час закінчення (`currentTick + durationTicks`). Час не стакається нескінченно, що запобігає випадковому перманентному байпасу.
+> **Примітка**: Повторний виклик `setTempBypass` коректно зсуває час закінчення (`currentTick + durationTicks`) і **не стакається нескінченно**, виключаючи баги з вічним байпасом.
 
 ---
 
-### 2. Телеметрія та безпечне скидання VL (`ViolationManager`)
+#### Сценарій 2: Trust Factor — підбір гравців (Matchmaking) та динамічні санкції
+
+**Проблема**: У рейтингових дуелях, BedWars чи SkyWars чітери з твінків псують статистику чесним гравцям, поки адміністрація не встигла їх забанити.
+
+**Рішення**: Darkness безперервно аналізує поведінку гравця і розраховує фактор довіри (`TrustLevel` та `TrustScore` від 0 до 100%).
 
 ```java
 import ac.darkness.darknessac.api.DarknessAPI;
-import ac.darkness.darknessac.api.managers.ViolationManager;
-import ac.darkness.darknessac.api.custom.CheckData;
+import ac.darkness.darknessac.api.TrustLevel;
 import org.bukkit.entity.Player;
 
-ViolationManager violations = DarknessAPI.getViolationManager();
+// Чистий пошук через Optional: жодної обов'язкової рутини з if (user != null)
+DarknessAPI.findUser(player).ifPresent(user -> {
+    TrustLevel level = user.getTrustLevel(); // GREEN, ORANGE, RED
+    int score = user.getTrustScore();        // 0 - 100%
+    int points = user.getTrustPoints();
 
-// Агреговані метрики порушень
-double totalVl = violations.getTotalViolations(player);
-double combatVl = violations.getCombatViolations(player);
-double movementVl = violations.getMovementViolations(player);
-double worldVl = violations.getWorldViolations(player);
+    // 1. Matchmaking у дуелях (як у CS2 Trust Factor):
+    if (level == TrustLevel.RED || score < 40) {
+        // Підозрілий гравець потрапляє в ізольований пул до таких самих підозрілих
+        joinIsolatedQueue(player);
+        player.sendMessage("§eПошук суперника з аналогічним рівнем довіри...");
+    } else {
+        // Чесні гравці грають лише з чесними
+        joinCleanQueue(player);
+    }
 
-// Ітерація по всіх активних чеках гравця
-for (CheckData check : violations.getCheckData(player)) {
-    String checkName = check.check();         // e.g. "KillAura"
-    String subtype = check.type();            // e.g. "A"
-    String fullName = check.fullCheckName();  // e.g. "KillAuraA"
-    double vl = check.violations();
-}
-
-// БЕЗПЕЧНЕ СКИДАННЯ: обнуляє лічильник VL до 0.0 без руйнування буферів предикшену
-violations.resetViolations(player, "KillAura");
-violations.resetViolations(player, "AutoClicker", "A");
-
-// Симуляція спрацювання чека для тестів
-violations.simulateFlag(player, "KillAura", "A", "Manual test");
-```
-
----
-
-### 3. Користувацькі сесії (`UserManager`)
-
-```java
-import ac.darkness.darknessac.api.DarknessAPI;
-import ac.darkness.darknessac.api.DarknessUser;
-import ac.darkness.darknessac.api.managers.UserManager;
-import org.bukkit.entity.Player;
-
-UserManager users = DarknessAPI.getUserManager();
-
-// Синхронний резолв (O(1), потокобезпечно)
-DarknessUser user = users.getUser(player);
-if (user != null) {
-    int ping = user.getTransactionPing();
-    String brand = user.getBrand();
-    String version = user.getVersionName();
-    int trustScore = user.getTrustScore(); // 0 - 100%
-}
-
-// Асинхронний резолв (для Folia та асинхронних завдань)
-users.getUserAsync(player.getUniqueId()).thenAccept(u -> {
-    if (u != null) {
-        double vl = u.getTotalViolations();
+    // 2. Динамічні обмеження на сервері:
+    if (level == TrustLevel.RED) {
+        applyIncreasedCommandCooldown(player, 10); // Кулдаун на команди 10 сек
+        disableTrading(player);                    // Заборона трейду та передачі речей
+        notifyStaff("Увага: підозрілий гравець " + player.getName() + " (Траст: " + score + "%)");
     }
 });
 ```
 
 ---
 
-### 4. Покарання (`PunishmentManager`)
+#### Сценарій 3: Керування буфером перевірки (`Buffer`) та виклик флагів
+
+**Проблема А (Помилкові спрацьовування)**: Специфичний кастомний блок сервера накопичує буфер у перевірки. До флага залишився 1 крок.  
+**Рішення**: Замість вимкнення перевірки обнуляємо її буфер у 0 при настанні вашої умови:
 
 ```java
 import ac.darkness.darknessac.api.DarknessAPI;
-import ac.darkness.darknessac.api.managers.PunishmentManager;
 import org.bukkit.entity.Player;
 
-PunishmentManager punishments = DarknessAPI.getPunishmentManager();
+// Лаконічний ланцюжок Optional без вкладених перевірок на null:
+DarknessAPI.findUser(player)
+    .flatMap(user -> user.findCheck("Speed"))
+    .ifPresent(check -> {
+        // Якщо буфер почав зростати через специфічну механіку — скидаємо його
+        if (playerIsOnCustomConveyorBlock(player)) {
+            check.resetBuffer(); // Встановлює buffer у 0.0
+        }
+    });
+```
 
-// Синхронне виконання покарання
-punishments.punish(player, "Використання чітів");
+**Проблема Б (Власна детекція чітерів)**: Ваш серверний плагін зафіксував неможливий клік або авто-тотем і хоче покарати гравця через стандартний пайплайн античіта.  
+**Рішення**: Викличте флаг перевірки через API:
 
-// Асинхронний виклик (безпечний для сторонніх потоків)
-punishments.punishAsync(player.getUniqueId(), "Cheating");
+```java
+// Симуляція флага чека: спрацюють стандартні сповіщення персоналу, запис у логи та авто-бан
+user.flag("KillAura", "A", "Custom combat hook triggered (impossible attack pattern)");
+
+// Або через ViolationManager:
+DarknessAPI.getViolationManager().simulateFlag(player, "AutoClicker", "A", "Click macro detected");
+```
+
+**Безпечне скидання порушень (VL)**:
+```java
+// Обнуляє лічильник VL до 0.0 без руйнування внутрішніх трекерів предикшену античіта
+DarknessAPI.getViolationManager().resetViolations(player, "KillAura");
 ```
 
 ---
 
-### 5. Система подій Bukkit / Folia
+#### Сценарій 4: Телеметрія гравця та скорборди / GUI для модераторів
 
-Події надсилаються через стандартний `PluginManager` Bukkit.
+**Проблема**: Персоналу потрібна прозора статистика: хто грає з підозрілого клієнта, у кого дивна чутливість і **які саме перевірки гравець флагав найчастіше**.
 
-> **Важливо для Folia**: На серверах Folia події викликаються синхронно в **регіональному потоці** гравця. Читання даних повністю безпечне; при зміні світу в обробнику використовуйте регіональний планувальник сутності.
+**Рішення**: Darkness надає детальну інформацію про клієнт і список усіх порушень гравця:
 
 ```java
+import ac.darkness.darknessac.api.DarknessAPI;
+import ac.darkness.darknessac.api.DarknessUser;
+import ac.darkness.darknessac.api.custom.CheckData;
+import org.bukkit.entity.Player;
+
+DarknessUser user = DarknessAPI.getUser(player);
+if (user != null) {
+    // Чутливість миші у відсотках (0 - 200%)
+    int sensX = user.getHumanSensitivityX();
+    int sensY = user.getHumanSensitivityY();
+
+    // Клієнтський бренд та версія
+    String brand = user.getBrand(); // "Lunar Client", "Badlion", "vanilla", etc.
+    String version = user.getVersionName(); // "1.20.4"
+    int ping = user.getTransactionPing();  // Точний пінг за транзакціями
+
+    // Список усіх чеків, які гравець флагав (для скорборда, таба чи GUI інспектора)
+    for (CheckData check : user.getCheckData()) {
+        if (check.violations() > 0) {
+            String checkName = check.check();         // "Interpolation"
+            String type = check.type();               // "A"
+            String fullName = check.fullCheckName(); // "InterpolationA"
+            double vl = check.violations();          // 32.0
+
+            // Приклад: "Interpolation (A) — 32 VL"
+            staff.sendMessage("§8» §7" + checkName + " §8(§c" + type + "§8) — §c" + (int) vl + " VL");
+        }
+    }
+}
+```
+
+---
+
+#### Сценарій 5: Скасування флагів у мирних зонах та захист персоналу (Події)
+
+**Проблема**: У лобі спавну встановлені декоративні лаунчпади, що викликають детектування, а адміністратор, який тестує механіки, не повинен отримати бан.
+
+```java
+import ac.darkness.darknessac.api.TrustLevel;
 import ac.darkness.darknessac.api.events.DarknessViolationEvent;
+import ac.darkness.darknessac.api.events.DarknessSetbackEvent;
+import ac.darkness.darknessac.api.events.DarknessTrustChangeEvent;
 import ac.darkness.darknessac.api.events.DarknessPunishEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
-public class AnticheatListener implements Listener {
+public class AnticheatIntegrationListener implements Listener {
 
-    // Скасування детектів на PvP-аренах
+    // 1. Скасування помилкових флагів на спавні або в мирних лобі
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onViolation(DarknessViolationEvent event) {
-        if (event.getPlayer().getWorld().getName().equalsIgnoreCase("pvp_arena")) {
+        if (event.getPlayer().getWorld().getName().equalsIgnoreCase("spawn_lobby")) {
             event.setCancelled(true);
+            return;
+        }
+
+        // Логування критичних детектувань у Discord
+        if (event.getViolations() >= 15.0 && !event.isExperimental()) {
+            sendDiscordAlert(event.getPlayer().getName(), event.getFullCheckName(), event.getViolations());
         }
     }
 
-    // Скасування покарань для персоналу
+    // 2. Скасування відкату (сетбека) в зонах кастомного паркуру
+    // Флаг і запис у логах залишаються, але гравця НЕ відкидає назад!
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onSetback(DarknessSetbackEvent event) {
+        if (event.getPlayer().getWorld().getName().equalsIgnoreCase("parkour")) {
+            event.setCancelled(true); // Скасовуємо відкат
+        }
+    }
+
+    // 3. Миттєва реакція на зниження Trust Factor (GREEN -> ORANGE -> RED)
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onTrustChange(DarknessTrustChangeEvent event) {
+        if (event.getNewLevel() == TrustLevel.RED) {
+            notifyStaff("§cУвага! Фактор довіри гравця " + event.getUsername() + " впав до RED (" + event.getTrustScore() + "%).");
+        }
+    }
+
+    // 4. Скасування покарання для персоналу з правами
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPunish(DarknessPunishEvent event) {
         if (event.getPlayer().hasPermission("darkness.bypass.punish")) {
-            event.setCancelled(true);
+            event.setCancelled(true); // Скасовуємо покарання
+            event.getPlayer().sendMessage("§cПокарання античіта скасовано: у вас є імунітет.");
         }
     }
 }
@@ -258,81 +342,98 @@ public class AnticheatListener implements Listener {
 
 ---
 
-### 6. Кастомні анімації покарань
+#### Сценарій 6: Кінематографічні анімації покарань (`AnimationMode`)
+
+**Проблема**: Створення гарної анімації бану (блискавки, вихор вогню, левітація) своїми силами вимагає великої кількості костилів: десятка `BukkitRunnable`, підрахунку фаз, заморожування гравця та виклику команд бану після завершення.
+
+**Рішення**: Базовий клас `AnimationMode`. Darkness бере на себе все:
+- Автоматично ставить на паузу перевірки та рух для гравця;
+- За потреби вмикає пакетну левітацію;
+- Надає покадрові колбеки `onStart`, `onTick(step)` та `onFinish`;
+- Надає `anim.getViewers()` — список глядачів поруч, щоб надсилати частки лише тим, хто бачить анімацію (без навантаження на весь сервер);
+- Після закінчення анімації античіт **сам автоматично виконує команди покарання** (бан, кік, глобальне повідомлення).
 
 ```java
 package com.example.animation;
 
+import ac.darkness.darknessac.api.DarknessAPI;
 import ac.darkness.darknessac.api.punishment.ActiveAnimation;
 import ac.darkness.darknessac.api.punishment.AnimationMode;
+import org.bukkit.Bukkit;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
-public class StrikeAnimation extends AnimationMode {
+public class LightningStrikeAnimation extends AnimationMode {
 
-    public StrikeAnimation() {
-        super(40, 2); // 40 тіків тривалість, крок кожні 2 тіки
+    public LightningStrikeAnimation() {
+        // 40 тіків тривалість (2 сек), крок кожні 2 тіки, левітація увімкнена
+        super(40, 2, true, 1);
     }
 
     @Override
-    public void onStart(ActiveAnimation anim) {
-        Player player = anim.getPlayer().getAsPlayer();
+    public void onStart(@NotNull ActiveAnimation anim) {
+        Player player = Bukkit.getPlayer(anim.getUser().getUniqueId());
         if (player != null) {
-            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.0f, 1.0f);
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.0f, 0.8f);
         }
     }
 
     @Override
-    public void onTick(ActiveAnimation anim, int step) {
-        Player player = anim.getPlayer().getAsPlayer();
+    public void onTick(@NotNull ActiveAnimation anim, int step) {
+        Player player = Bukkit.getPlayer(anim.getUser().getUniqueId());
         if (player == null) return;
-        player.getWorld().spawnParticle(Particle.FLAME, anim.getX(), anim.getY() + 0.5, anim.getZ(), 4);
+
+        double radius = 1.5 - (step * 0.05);
+        double angle = step * 0.5;
+        double x = anim.getX() + radius * Math.cos(angle);
+        double z = anim.getZ() + radius * Math.sin(angle);
+
+        player.getWorld().spawnParticle(Particle.FLAME, x, anim.getY() + (step * 0.1), z, 2, 0, 0, 0, 0.01);
     }
 
     @Override
-    public void onFinish(ActiveAnimation anim) {
-        Player player = anim.getPlayer().getAsPlayer();
+    public void onFinish(@NotNull ActiveAnimation anim) {
+        Player player = Bukkit.getPlayer(anim.getUser().getUniqueId());
         if (player != null) {
+            player.getWorld().strikeLightningEffect(player.getLocation());
             player.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, anim.getX(), anim.getY() + 1.0, anim.getZ(), 1);
         }
+        // Команди бану з конфігурації Darkness виконаються автоматично одразу після цього методу!
     }
 }
 ```
 
-Реєстрація:
+Реєстрація в `onEnable`:
 ```java
-DarknessAPI.getPunishmentManager().registerAnimation("STRIKE", new StrikeAnimation());
+DarknessAPI.registerAnimation("LIGHTNING", new LightningStrikeAnimation());
 ```
 
 ---
 
-### Гарантії та контракти API
+### Готовий приклад реалізації (DarknessExample)
 
-1. **Життєвий цикл гравця**:
-   - `DarknessUser` валідний **тільки поки гравець перебуває в мережі**.
-   - При виході гравця сесія очищається; `getUser()` повертає `null`.
-   - Не зберігайте посилання на `DarknessUser` між тіками сервера.
-2. **Семантика тимчасового імунітету**:
-   - Час обчислюється в тіках сервера (20 тіків/сек).
-   - Повторний виклик `setTempBypass` оновлює таймер до `currentTick + duration` (без нескінченного накопичення).
-   - Невідома назва перевірки при `isBypassing("НевідомийЧек")` безпечно повертає `false` без NPE.
-3. **Потокобезпека**:
-   - Всі методи `UserManager`, `BypassManager` та `ViolationManager` позначені `@ThreadSafe` і безпечні для виклику з асинхронних завдань та паралельних регіонів Folia.
-   - Читання метрик `DarknessUser` (пінг, траст, порушення) є атомарним.
-4. **Семантичне версіонування (SemVer 2.0.0)**:
-   - **MAJOR**: Несумісні зміни сигнатур або видалення застарілих методів.
-   - **MINOR**: Додавання нових менеджерів, методів та подій зі збереженням зворотної сумісності.
-   - **PATCH**: Виправлення помилок та оновлення документації.
+У репозиторії **[DarknessExample](https://github.com/Darkness-Liquidation/DarknessExample)** доступний повноцінний робочий плагін, що демонструє:
+- Адміністративні команди: `/darkness bypass`, `/darkness info`, `/darkness flag`, `/darkness punish`;
+- Перевірку траст-фактора, чутливості та активних флагів;
+- Кастомний режим анімації покарання `InfernoMode` з пакетами `PacketEvents`;
+- Лістенери скасування помилкових спрацьовувань та хвиль банів.
+
+👉 **[Перейти до DarknessExample на GitHub](https://github.com/Darkness-Liquidation/DarknessExample)**
 
 ---
 
-### Приклад готового плагіна
+### Контракти та гарантії API
 
-👉 **[DarknessExample](https://github.com/Darkness-Liquidation/DarknessExample)**
+1. **Життєвий цикл сесії**: `DarknessUser` існує лише поки гравець на сервері. При виході сесія інвалідується. Не зберігайте постійні посилання на `DarknessUser` у колекціях — запитуйте через `DarknessAPI.getUser(player)`.
+2. **Безпека часу**: Всі методи `setTempBypass` та `setTempBypassTicks` розраховують абсолютний час закінчення (`currentTick + ticks`). Вони безпечні при багаторазових викликах і не призводять до вічного обходу.
+3. **Потокобезпека**: Читання метрик `DarknessUser` (пінг, чутливість, траст, violations) є потокобезпечним і може викликатися з асинхронних завдань та паралельних потоків Folia.
+4. **Версіонування та сумісність**: Мінорні оновлення гарантують повну зворотну сумісність — ваш код не зламається при оновленні версії API.
 
 ---
 
 ### Спільнота та підтримка
 
-- Discord: [Darkness Liquidation Discord](https://dsc.gg/darkness-liquidation)
+- Офіційний Discord: [Darkness Liquidation Discord](https://dsc.gg/darkness-liquidation)
+- Репозиторій прикладів: [DarknessExample](https://github.com/Darkness-Liquidation/DarknessExample)

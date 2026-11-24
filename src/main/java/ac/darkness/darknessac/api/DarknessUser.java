@@ -12,6 +12,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @ThreadSafe
@@ -105,6 +106,14 @@ public interface DarknessUser extends ConfigReloadable, BasicReloadable, Darknes
         return getCheck(full);
     }
 
+    default Optional<AbstractCheck> findCheck(String name) {
+        return Optional.ofNullable(getCheck(name));
+    }
+
+    default Optional<AbstractCheck> findCheck(String check, String type) {
+        return Optional.ofNullable(getCheck(check, type));
+    }
+
     void runSafely(Runnable runnable);
 
     int getLastTransactionReceived();
@@ -143,25 +152,27 @@ public interface DarknessUser extends ConfigReloadable, BasicReloadable, Darknes
         setTempBypass(Math.max(1L, ticks / 20L));
     }
 
-    default void setTempBypass(String checkName, long seconds) {
-        setTempBypassTicks(checkName, seconds * 20L);
+    default void setTempBypass(CheckType checkType, long seconds) {
+        setTempBypassTicks(checkType, seconds * 20L);
     }
 
-    default void setTempBypassTicks(String checkName, long ticks) {
-        AbstractCheck check = getCheck(checkName);
-        if (check != null) {
-            check.setTempBypassTicks(ticks);
+    default void setTempBypassTicks(CheckType checkType, long ticks) {
+        if (checkType == null) return;
+        for (AbstractCheck check : getChecks()) {
+            if (check.getType() == checkType) {
+                check.setTempBypassTicks(ticks);
+            }
         }
     }
 
-    default void setCategoryTempBypass(String category, long seconds) {
+    default void setCategoryTempBypass(CheckCategory category, long seconds) {
         setCategoryTempBypassTicks(category, seconds * 20L);
     }
 
-    default void setCategoryTempBypassTicks(String category, long ticks) {
+    default void setCategoryTempBypassTicks(CheckCategory category, long ticks) {
         if (category == null) return;
         for (AbstractCheck check : getChecks()) {
-            if (category.equalsIgnoreCase(check.getCategory())) {
+            if (check.getCategory() == category) {
                 check.setTempBypassTicks(ticks);
             }
         }
@@ -171,10 +182,26 @@ public interface DarknessUser extends ConfigReloadable, BasicReloadable, Darknes
         return false;
     }
 
-    default boolean isBypassing(String checkName) {
+    default boolean isBypassing(CheckType checkType) {
+        if (checkType == null) return false;
         if (isBypassing()) return true;
-        AbstractCheck check = getCheck(checkName);
-        return check != null && check.isBypassing();
+        for (AbstractCheck check : getChecks()) {
+            if (check.getType() == checkType && check.isBypassing()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    default boolean isBypassing(CheckCategory category) {
+        if (category == null) return false;
+        if (isBypassing()) return true;
+        for (AbstractCheck check : getChecks()) {
+            if (category == check.getCategory() && check.isBypassing()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     default boolean isTempBypassing() {
@@ -220,6 +247,24 @@ public interface DarknessUser extends ConfigReloadable, BasicReloadable, Darknes
 
     default double getWorldViolations() {
         return 0.0;
+    }
+
+    default double getViolations(CheckCategory category) {
+        if (category == null) return 0.0;
+        return switch (category) {
+            case COMBAT -> getCombatViolations();
+            case MOVEMENT -> getMovementViolations();
+            case WORLD -> getWorldViolations();
+            default -> {
+                double total = 0.0;
+                for (AbstractCheck c : getChecks()) {
+                    if (category == c.getCategory()) {
+                        total += c.getViolations();
+                    }
+                }
+                yield total;
+            }
+        };
     }
 
     default Collection<CheckData> getCheckData() {

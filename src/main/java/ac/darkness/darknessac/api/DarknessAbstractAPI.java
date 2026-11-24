@@ -4,6 +4,7 @@ import ac.darkness.darknessac.api.alerts.AlertManager;
 import ac.darkness.darknessac.api.common.BasicReloadable;
 import ac.darkness.darknessac.api.config.ConfigManager;
 import ac.darkness.darknessac.api.config.ConfigReloadable;
+import ac.darkness.darknessac.api.custom.CheckData;
 import ac.darkness.darknessac.api.event.EventBus;
 import ac.darkness.darknessac.api.managers.BypassManager;
 import ac.darkness.darknessac.api.managers.PunishmentManager;
@@ -11,13 +12,13 @@ import ac.darkness.darknessac.api.managers.UserManager;
 import ac.darkness.darknessac.api.managers.ViolationManager;
 import ac.darkness.darknessac.api.punishment.AnimationMode;
 import ac.darkness.darknessac.api.punishment.PunishAnimation;
-import ac.darkness.darknessac.api.custom.CheckData;
-import java.util.Collection;
-import java.util.Collections;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -47,6 +48,18 @@ public interface DarknessAbstractAPI extends ConfigReloadable, BasicReloadable {
         if (playerOrUuid instanceof UUID id) return getUser(id);
         if (playerOrUuid instanceof DarknessIdentity id) return getUser(id.getUniqueId());
         return null;
+    }
+
+    default @NotNull Optional<DarknessUser> findUser(UUID uuid) {
+        return Optional.ofNullable(getUser(uuid));
+    }
+
+    default @NotNull Optional<DarknessUser> findUser(Player player) {
+        return Optional.ofNullable(getUser(player));
+    }
+
+    default @NotNull Optional<DarknessUser> findUser(Object playerOrUuid) {
+        return Optional.ofNullable(getUser(playerOrUuid));
     }
 
     void registerVariable(String variable, @Nullable Function<DarknessUser, String> replacement);
@@ -85,43 +98,84 @@ public interface DarknessAbstractAPI extends ConfigReloadable, BasicReloadable {
     default void punish(String playerName, String reason) {}
 
     default void setTempBypass(Player player, long seconds) {
-        DarknessUser user = getUser(player);
+        if (player != null) setTempBypass(player.getUniqueId(), seconds);
+    }
+
+    default void setTempBypass(UUID uuid, long seconds) {
+        DarknessUser user = getUser(uuid);
         if (user != null) user.setTempBypass(seconds);
     }
 
     default void setTempBypassTicks(Player player, long ticks) {
-        DarknessUser user = getUser(player);
+        if (player != null) setTempBypassTicks(player.getUniqueId(), ticks);
+    }
+
+    default void setTempBypassTicks(UUID uuid, long ticks) {
+        DarknessUser user = getUser(uuid);
         if (user != null) user.setTempBypassTicks(ticks);
     }
 
-    default void setTempBypass(Player player, String checkName, long seconds) {
-        DarknessUser user = getUser(player);
-        if (user != null) user.setTempBypass(checkName, seconds);
+    default void setTempBypass(Player player, CheckType checkType, long seconds) {
+        if (player != null && checkType != null) setTempBypass(player.getUniqueId(), checkType, seconds);
     }
 
-    default void setTempBypassTicks(Player player, String checkName, long ticks) {
-        DarknessUser user = getUser(player);
-        if (user != null) user.setTempBypassTicks(checkName, ticks);
+    default void setTempBypass(UUID uuid, CheckType checkType, long seconds) {
+        DarknessUser user = getUser(uuid);
+        if (user != null) user.setTempBypass(checkType, seconds);
     }
 
-    default void setCategoryTempBypass(Player player, String category, long seconds) {
-        DarknessUser user = getUser(player);
+    default void setTempBypassTicks(Player player, CheckType checkType, long ticks) {
+        if (player != null && checkType != null) setTempBypassTicks(player.getUniqueId(), checkType, ticks);
+    }
+
+    default void setTempBypassTicks(UUID uuid, CheckType checkType, long ticks) {
+        DarknessUser user = getUser(uuid);
+        if (user != null) user.setTempBypassTicks(checkType, ticks);
+    }
+
+    default void setCategoryTempBypass(Player player, CheckCategory category, long seconds) {
+        if (player != null && category != null) setCategoryTempBypass(player.getUniqueId(), category, seconds);
+    }
+
+    default void setCategoryTempBypass(UUID uuid, CheckCategory category, long seconds) {
+        DarknessUser user = getUser(uuid);
         if (user != null) user.setCategoryTempBypass(category, seconds);
     }
 
-    default void setCategoryTempBypassTicks(Player player, String category, long ticks) {
-        DarknessUser user = getUser(player);
+    default void setCategoryTempBypassTicks(Player player, CheckCategory category, long ticks) {
+        if (player != null && category != null) setCategoryTempBypassTicks(player.getUniqueId(), category, ticks);
+    }
+
+    default void setCategoryTempBypassTicks(UUID uuid, CheckCategory category, long ticks) {
+        DarknessUser user = getUser(uuid);
         if (user != null) user.setCategoryTempBypassTicks(category, ticks);
     }
 
     default boolean isBypassing(Player player) {
-        DarknessUser user = getUser(player);
+        return player != null && isBypassing(player.getUniqueId());
+    }
+
+    default boolean isBypassing(UUID uuid) {
+        DarknessUser user = getUser(uuid);
         return user != null && user.isBypassing();
     }
 
-    default boolean isBypassing(Player player, String checkName) {
-        DarknessUser user = getUser(player);
-        return user != null && user.isBypassing(checkName);
+    default boolean isBypassing(Player player, CheckType checkType) {
+        return player != null && checkType != null && isBypassing(player.getUniqueId(), checkType);
+    }
+
+    default boolean isBypassing(UUID uuid, CheckType checkType) {
+        DarknessUser user = getUser(uuid);
+        return user != null && user.isBypassing(checkType);
+    }
+
+    default boolean isBypassing(Player player, CheckCategory category) {
+        return player != null && isBypassing(player.getUniqueId(), category);
+    }
+
+    default boolean isBypassing(UUID uuid, CheckCategory category) {
+        DarknessUser user = getUser(uuid);
+        return user != null && user.isBypassing(category);
     }
 
     @NotNull
@@ -156,25 +210,25 @@ public interface DarknessAbstractAPI extends ConfigReloadable, BasicReloadable {
             }
 
             @Override
-            public void setTempBypass(@NotNull UUID uuid, @NotNull String checkName, long seconds) {
+            public void setTempBypass(@NotNull UUID uuid, @NotNull CheckType checkType, long seconds) {
                 DarknessUser user = getUser(uuid);
-                if (user != null) user.setTempBypass(checkName, seconds);
+                if (user != null) user.setTempBypass(checkType, seconds);
             }
 
             @Override
-            public void setTempBypassTicks(@NotNull UUID uuid, @NotNull String checkName, long ticks) {
+            public void setTempBypassTicks(@NotNull UUID uuid, @NotNull CheckType checkType, long ticks) {
                 DarknessUser user = getUser(uuid);
-                if (user != null) user.setTempBypassTicks(checkName, ticks);
+                if (user != null) user.setTempBypassTicks(checkType, ticks);
             }
 
             @Override
-            public void setCategoryTempBypass(@NotNull UUID uuid, @NotNull String category, long seconds) {
+            public void setCategoryTempBypass(@NotNull UUID uuid, @NotNull CheckCategory category, long seconds) {
                 DarknessUser user = getUser(uuid);
                 if (user != null) user.setCategoryTempBypass(category, seconds);
             }
 
             @Override
-            public void setCategoryTempBypassTicks(@NotNull UUID uuid, @NotNull String category, long ticks) {
+            public void setCategoryTempBypassTicks(@NotNull UUID uuid, @NotNull CheckCategory category, long ticks) {
                 DarknessUser user = getUser(uuid);
                 if (user != null) user.setCategoryTempBypassTicks(category, ticks);
             }
@@ -186,9 +240,15 @@ public interface DarknessAbstractAPI extends ConfigReloadable, BasicReloadable {
             }
 
             @Override
-            public boolean isBypassing(@NotNull UUID uuid, @NotNull String checkName) {
+            public boolean isBypassing(@NotNull UUID uuid, @NotNull CheckType checkType) {
                 DarknessUser user = getUser(uuid);
-                return user != null && user.isBypassing(checkName);
+                return user != null && user.isBypassing(checkType);
+            }
+
+            @Override
+            public boolean isBypassing(@NotNull UUID uuid, @NotNull CheckCategory category) {
+                DarknessUser user = getUser(uuid);
+                return user != null && user.isBypassing(category);
             }
 
             @Override
@@ -289,7 +349,11 @@ public interface DarknessAbstractAPI extends ConfigReloadable, BasicReloadable {
     }
 
     default double getTotalViolations(Player player) {
-        DarknessUser user = getUser(player);
+        return player != null ? getTotalViolations(player.getUniqueId()) : 0.0;
+    }
+
+    default double getTotalViolations(UUID uuid) {
+        DarknessUser user = getUser(uuid);
         return user != null ? user.getTotalViolations() : 0.0;
     }
 }

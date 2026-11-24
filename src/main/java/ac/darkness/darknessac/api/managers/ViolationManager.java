@@ -1,5 +1,7 @@
 package ac.darkness.darknessac.api.managers;
 
+import ac.darkness.darknessac.api.CheckCategory;
+import ac.darkness.darknessac.api.DarknessIdentity;
 import ac.darkness.darknessac.api.annotation.ThreadSafe;
 import ac.darkness.darknessac.api.custom.CheckData;
 import org.bukkit.entity.Player;
@@ -22,9 +24,23 @@ public interface ViolationManager {
         return getTotalViolations(player.getUniqueId());
     }
 
+    default double getTotalViolations(@NotNull DarknessIdentity identity) {
+        return getTotalViolations(identity.getUniqueId());
+    }
+
     @NotNull
     default CompletableFuture<Double> getTotalViolationsAsync(@NotNull UUID uuid) {
         return CompletableFuture.completedFuture(getTotalViolations(uuid));
+    }
+
+    @NotNull
+    default CompletableFuture<Double> getTotalViolationsAsync(@NotNull Player player) {
+        return CompletableFuture.completedFuture(getTotalViolations(player.getUniqueId()));
+    }
+
+    @NotNull
+    default CompletableFuture<Double> getTotalViolationsAsync(@NotNull DarknessIdentity identity) {
+        return CompletableFuture.completedFuture(getTotalViolations(identity.getUniqueId()));
     }
 
     double getCombatViolations(@NotNull UUID uuid);
@@ -33,10 +49,18 @@ public interface ViolationManager {
         return getCombatViolations(player.getUniqueId());
     }
 
+    default double getCombatViolations(@NotNull DarknessIdentity identity) {
+        return getCombatViolations(identity.getUniqueId());
+    }
+
     double getMovementViolations(@NotNull UUID uuid);
 
     default double getMovementViolations(@NotNull Player player) {
         return getMovementViolations(player.getUniqueId());
+    }
+
+    default double getMovementViolations(@NotNull DarknessIdentity identity) {
+        return getMovementViolations(identity.getUniqueId());
     }
 
     double getWorldViolations(@NotNull UUID uuid);
@@ -45,12 +69,38 @@ public interface ViolationManager {
         return getWorldViolations(player.getUniqueId());
     }
 
+    default double getWorldViolations(@NotNull DarknessIdentity identity) {
+        return getWorldViolations(identity.getUniqueId());
+    }
+
+    default double getCategoryViolations(@NotNull UUID uuid, @NotNull CheckCategory category) {
+        return switch (category) {
+            case COMBAT -> getCombatViolations(uuid);
+            case MOVEMENT -> getMovementViolations(uuid);
+            case WORLD -> getWorldViolations(uuid);
+            default -> 0.0;
+        };
+    }
+
+    default double getCategoryViolations(@NotNull Player player, @NotNull CheckCategory category) {
+        return getCategoryViolations(player.getUniqueId(), category);
+    }
+
+    default double getCategoryViolations(@NotNull DarknessIdentity identity, @NotNull CheckCategory category) {
+        return getCategoryViolations(identity.getUniqueId(), category);
+    }
+
     @NotNull
     Collection<CheckData> getCheckData(@NotNull UUID uuid);
 
     @NotNull
     default Collection<CheckData> getCheckData(@NotNull Player player) {
         return getCheckData(player.getUniqueId());
+    }
+
+    @NotNull
+    default Collection<CheckData> getCheckData(@NotNull DarknessIdentity identity) {
+        return getCheckData(identity.getUniqueId());
     }
 
     /**
@@ -64,6 +114,10 @@ public interface ViolationManager {
 
     default boolean resetViolations(@NotNull Player player, @NotNull String check) {
         return resetViolations(player.getUniqueId(), check);
+    }
+
+    default boolean resetViolations(@NotNull DarknessIdentity identity, @NotNull String check) {
+        return resetViolations(identity.getUniqueId(), check);
     }
 
     /**
@@ -80,6 +134,10 @@ public interface ViolationManager {
         return resetViolations(player.getUniqueId(), check, type);
     }
 
+    default boolean resetViolations(@NotNull DarknessIdentity identity, @NotNull String check, @NotNull String type) {
+        return resetViolations(identity.getUniqueId(), check, type);
+    }
+
     /**
      * Simulates an anticheat check flag.
      *
@@ -93,5 +151,9 @@ public interface ViolationManager {
 
     default boolean simulateFlag(@NotNull Player player, @NotNull String check, @NotNull String type, @NotNull String verbose) {
         return simulateFlag(player.getUniqueId(), check, type, verbose);
+    }
+
+    default boolean simulateFlag(@NotNull DarknessIdentity identity, @NotNull String check, @NotNull String type, @NotNull String verbose) {
+        return simulateFlag(identity.getUniqueId(), check, type, verbose);
     }
 }

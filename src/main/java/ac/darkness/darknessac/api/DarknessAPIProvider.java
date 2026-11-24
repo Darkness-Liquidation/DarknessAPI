@@ -22,7 +22,7 @@ public final class DarknessAPIProvider {
 
     public static DarknessAbstractAPI get() {
         if (instance == null) {
-            throw new IllegalStateException("DarknessAPI is not loaded. Ensure Darkness anticheat is enabled.");
+            throw new IllegalStateException("DarknessAPI is not loaded. Ensure Darkness Liquidation is enabled.");
         }
         return instance;
     }

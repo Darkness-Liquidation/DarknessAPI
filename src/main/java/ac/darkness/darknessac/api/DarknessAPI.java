@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public final class DarknessAPI {
@@ -79,6 +80,21 @@ public final class DarknessAPI {
         return null;
     }
 
+    @NotNull
+    public static Optional<DarknessUser> findUser(@NotNull Player player) {
+        return Optional.ofNullable(getUser(player));
+    }
+
+    @NotNull
+    public static Optional<DarknessUser> findUser(@NotNull UUID uuid) {
+        return Optional.ofNullable(getUser(uuid));
+    }
+
+    @NotNull
+    public static Optional<DarknessUser> findUser(@NotNull Object playerOrUuid) {
+        return Optional.ofNullable(getUser(playerOrUuid));
+    }
+
     // ------------------- CONVENIENCE SHORTCUTS -------------------
 
     public static void punish(@NotNull Player player, @NotNull String reason) {
@@ -89,12 +105,174 @@ public final class DarknessAPI {
         getPunishmentManager().punish(uuid, reason);
     }
 
+    public static void punish(@NotNull DarknessIdentity identity, @NotNull String reason) {
+        getPunishmentManager().punish(identity, reason);
+    }
+
     public static void setTempBypass(@NotNull Player player, long seconds) {
         getBypassManager().setTempBypass(player, seconds);
     }
 
+    public static void setTempBypass(@NotNull UUID uuid, long seconds) {
+        getBypassManager().setTempBypass(uuid, seconds);
+    }
+
+    public static void setTempBypass(@NotNull DarknessIdentity identity, long seconds) {
+        getBypassManager().setTempBypass(identity, seconds);
+    }
+
+    public static void setTempBypassTicks(@NotNull Player player, long ticks) {
+        getBypassManager().setTempBypassTicks(player, ticks);
+    }
+
+    public static void setTempBypassTicks(@NotNull UUID uuid, long ticks) {
+        getBypassManager().setTempBypassTicks(uuid, ticks);
+    }
+
+    public static void setTempBypassTicks(@NotNull DarknessIdentity identity, long ticks) {
+        getBypassManager().setTempBypassTicks(identity, ticks);
+    }
+
+    public static void setCategoryTempBypass(@NotNull Player player, @NotNull CheckCategory category, long seconds) {
+        getBypassManager().setCategoryTempBypass(player, category, seconds);
+    }
+
+    public static void setCategoryTempBypass(@NotNull UUID uuid, @NotNull CheckCategory category, long seconds) {
+        getBypassManager().setCategoryTempBypass(uuid, category, seconds);
+    }
+
+    public static void setCategoryTempBypassTicks(@NotNull Player player, @NotNull CheckCategory category, long ticks) {
+        getBypassManager().setCategoryTempBypassTicks(player, category, ticks);
+    }
+
+    public static void setCategoryTempBypassTicks(@NotNull UUID uuid, @NotNull CheckCategory category, long ticks) {
+        getBypassManager().setCategoryTempBypassTicks(uuid, category, ticks);
+    }
+
     public static boolean isBypassing(@NotNull Player player) {
         return getBypassManager().isBypassing(player);
+    }
+
+    public static boolean isBypassing(@NotNull UUID uuid) {
+        return getBypassManager().isBypassing(uuid);
+    }
+
+    public static boolean isBypassing(@NotNull DarknessIdentity identity) {
+        return getBypassManager().isBypassing(identity);
+    }
+
+    public static void setTempBypass(@NotNull Player player, @NotNull CheckType checkType, long seconds) {
+        getBypassManager().setTempBypass(player, checkType, seconds);
+    }
+
+    public static void setTempBypass(@NotNull UUID uuid, @NotNull CheckType checkType, long seconds) {
+        getBypassManager().setTempBypass(uuid, checkType, seconds);
+    }
+
+    public static void setTempBypass(@NotNull DarknessIdentity identity, @NotNull CheckType checkType, long seconds) {
+        getBypassManager().setTempBypass(identity, checkType, seconds);
+    }
+
+    public static void setTempBypassTicks(@NotNull Player player, @NotNull CheckType checkType, long ticks) {
+        getBypassManager().setTempBypassTicks(player, checkType, ticks);
+    }
+
+    public static void setTempBypassTicks(@NotNull UUID uuid, @NotNull CheckType checkType, long ticks) {
+        getBypassManager().setTempBypassTicks(uuid, checkType, ticks);
+    }
+
+    public static void setTempBypassTicks(@NotNull DarknessIdentity identity, @NotNull CheckType checkType, long ticks) {
+        getBypassManager().setTempBypassTicks(identity, checkType, ticks);
+    }
+
+    public static boolean isBypassing(@NotNull Player player, @NotNull CheckType checkType) {
+        return getBypassManager().isBypassing(player, checkType);
+    }
+
+    public static boolean isBypassing(@NotNull UUID uuid, @NotNull CheckType checkType) {
+        return getBypassManager().isBypassing(uuid, checkType);
+    }
+
+    public static boolean isBypassing(@NotNull DarknessIdentity identity, @NotNull CheckType checkType) {
+        return getBypassManager().isBypassing(identity, checkType);
+    }
+
+    public static boolean isBypassing(@NotNull Player player, @NotNull CheckCategory category) {
+        return getBypassManager().isBypassing(player, category);
+    }
+
+    public static boolean isBypassing(@NotNull UUID uuid, @NotNull CheckCategory category) {
+        return getBypassManager().isBypassing(uuid, category);
+    }
+
+    public static double getTotalViolations(@NotNull Player player) {
+        return getViolationManager().getTotalViolations(player);
+    }
+
+    public static double getTotalViolations(@NotNull UUID uuid) {
+        return getViolationManager().getTotalViolations(uuid);
+    }
+
+    // ------------------- DYNAMIC BYPASS PREDICATES -------------------
+
+    public static boolean isPredicateBypassing(@NotNull Player player) {
+        return getBypassManager().isPredicateBypassing(player);
+    }
+
+    public static boolean isPredicateBypassing(@NotNull Player player, @NotNull CheckCategory category) {
+        return getBypassManager().isPredicateBypassing(player, category);
+    }
+
+    public static boolean isPredicateBypassing(@NotNull Player player, @NotNull CheckType checkType) {
+        return getBypassManager().isPredicateBypassing(player, checkType);
+    }
+
+    public static boolean isPredicateBypassing(@NotNull UUID uuid) {
+        return getBypassManager().isPredicateBypassing(uuid);
+    }
+
+    public static boolean isPredicateBypassing(@NotNull UUID uuid, @NotNull CheckCategory category) {
+        return getBypassManager().isPredicateBypassing(uuid, category);
+    }
+
+    public static boolean isPredicateBypassing(@NotNull UUID uuid, @NotNull CheckType checkType) {
+        return getBypassManager().isPredicateBypassing(uuid, checkType);
+    }
+
+    public static boolean isPredicateBypassing(@NotNull DarknessUser user) {
+        return getBypassManager().isPredicateBypassing(user);
+    }
+
+    public static boolean isPredicateBypassing(@NotNull DarknessUser user, @NotNull CheckCategory category) {
+        return getBypassManager().isPredicateBypassing(user, category);
+    }
+
+    public static boolean isPredicateBypassing(@NotNull DarknessUser user, @NotNull CheckType checkType) {
+        return getBypassManager().isPredicateBypassing(user, checkType);
+    }
+
+    public static void registerBypassPredicate(@NotNull CheckCategory category, @NotNull java.util.function.Predicate<Player> predicate) {
+        getBypassManager().registerBypassPredicate(category, predicate);
+    }
+
+    public static void registerBypassPredicate(@NotNull CheckType checkType, @NotNull java.util.function.Predicate<Player> predicate) {
+        getBypassManager().registerBypassPredicate(checkType, predicate);
+    }
+
+    public static void registerBypassPredicate(@NotNull java.util.function.Predicate<Player> predicate) {
+        getBypassManager().registerBypassPredicate(predicate);
+    }
+
+    public static void unregisterBypassPredicate(@NotNull CheckCategory category, @NotNull java.util.function.Predicate<Player> predicate) {
+        getBypassManager().unregisterBypassPredicate(category, predicate);
+    }
+
+    public static void unregisterBypassPredicate(@NotNull CheckType checkType, @NotNull java.util.function.Predicate<Player> predicate) {
+        getBypassManager().unregisterBypassPredicate(checkType, predicate);
+    }
+
+    public static void unregisterBypassPredicate(@NotNull java.util.function.Predicate<Player> predicate) {
+        getBypassManager().unregisterBypassPredicate(predicate);
     }
 
     // ------------------- ANIMATIONS -------------------
