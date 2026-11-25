@@ -75,12 +75,31 @@ public enum CheckType {
      * @return true if matching
      */
     public boolean matches(@Nullable String name) {
-        if (name == null) return false;
+        if (name == null || name.isBlank()) return false;
         String clean = name.trim().replaceAll("[\\s()_.-]", "");
-        return this.name().equalsIgnoreCase(name)
+        String selfClean = this.checkName.replaceAll("[\\s()_.-]", "");
+        if (this.name().equalsIgnoreCase(name)
                 || this.name().equalsIgnoreCase(clean)
                 || this.checkName.equalsIgnoreCase(name)
-                || this.checkName.replaceAll("[\\s()_.-]", "").equalsIgnoreCase(clean);
+                || selfClean.equalsIgnoreCase(clean)) {
+            return true;
+        }
+        int paren = name.indexOf('(');
+        if (paren > 0) {
+            String base = name.substring(0, paren).trim();
+            if (this.name().equalsIgnoreCase(base) || this.checkName.equalsIgnoreCase(base)) {
+                return true;
+            }
+        }
+        int dot = name.indexOf('.');
+        if (dot > 0) {
+            String base = name.substring(0, dot).trim();
+            if (this.name().equalsIgnoreCase(base) || this.checkName.equalsIgnoreCase(base)) {
+                return true;
+            }
+        }
+        return clean.toLowerCase().startsWith(selfClean.toLowerCase())
+                || clean.toLowerCase().startsWith(this.name().toLowerCase());
     }
 
     /**
@@ -92,9 +111,15 @@ public enum CheckType {
     @NotNull
     public static CheckType fromString(@Nullable String name) {
         if (name == null || name.isBlank()) return OTHER;
-        String clean = name.trim().replaceAll("[\\s()_.-]", "");
+        String trimmed = name.trim();
+        String base = trimmed;
+        if (trimmed.contains("(")) {
+            base = trimmed.substring(0, trimmed.indexOf('(')).trim();
+        } else if (trimmed.contains(".")) {
+            base = trimmed.substring(0, trimmed.indexOf('.')).trim();
+        }
         for (CheckType type : values()) {
-            if (type.matches(name) || type.matches(clean)) {
+            if (type != OTHER && (type.matches(trimmed) || type.matches(base))) {
                 return type;
             }
         }

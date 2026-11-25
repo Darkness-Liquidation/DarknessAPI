@@ -51,8 +51,9 @@ public enum CheckCategory {
      * @return true if matching
      */
     public boolean matches(@Nullable String name) {
-        if (name == null) return false;
-        return this.name().equalsIgnoreCase(name) || this.displayName.equalsIgnoreCase(name);
+        if (name == null || name.isBlank()) return false;
+        String trimmed = name.trim();
+        return this.name().equalsIgnoreCase(trimmed) || this.displayName.equalsIgnoreCase(trimmed);
     }
 
     /**
