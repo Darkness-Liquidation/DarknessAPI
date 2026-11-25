@@ -1,101 +1,83 @@
 package ac.darkness.darknessac.api.events;
 
-import ac.darkness.darknessac.api.CheckCategory;
-import ac.darkness.darknessac.api.CheckType;
-import ac.darkness.darknessac.api.DarknessAPI;
+import ac.darkness.darknessac.api.AbstractCheck;
 import ac.darkness.darknessac.api.DarknessUser;
+import ac.darkness.darknessac.api.TrustLevel;
+import ac.darkness.darknessac.api.event.DarknessCheckEvent;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * Fired immediately before an anticheat setback action is applied to a player.
- * Cancelling this event prevents the setback (teleport, attack cancel, inventory close)
- * from being executed, while keeping violation telemetry and alerts intact.
- */
-public final class DarknessSetbackEvent extends Event implements Cancellable {
-    private static final HandlerList handlers = new HandlerList();
+import java.util.UUID;
 
-    private final Player player;
-    @Getter private final String check;
-    @Getter private final String type;
+public class DarknessSetbackEvent extends DarknessCheckEvent {
+    @Getter private final String checkName;
+    @Getter private final String checkType;
     @Getter private final String fullCheckName;
     @Getter private final double violations;
     @Getter private final double setbackVL;
-    private boolean cancelled = false;
 
-    public DarknessSetbackEvent(@NotNull Player player,
-                                @NotNull String check,
-                                @NotNull String type,
+    public DarknessSetbackEvent(@NotNull DarknessUser user,
+                                @Nullable AbstractCheck checkInstance,
+                                @NotNull String checkName,
+                                @NotNull String checkType,
                                 @NotNull String fullCheckName,
                                 double violations,
                                 double setbackVL) {
-        this(player, check, type, fullCheckName, violations, setbackVL, !Bukkit.isPrimaryThread());
-    }
-
-    public DarknessSetbackEvent(@NotNull Player player,
-                                @NotNull String check,
-                                @NotNull String type,
-                                @NotNull String fullCheckName,
-                                double violations,
-                                double setbackVL,
-                                boolean isAsync) {
-        super(isAsync);
-        this.player = player;
-        this.check = check;
-        this.type = type;
+        super(user, checkInstance, true);
+        this.checkName = checkName;
+        this.checkType = checkType;
         this.fullCheckName = fullCheckName;
         this.violations = violations;
         this.setbackVL = setbackVL;
     }
 
-    @NotNull
-    public Player getPlayer() {
-        return player;
+    public DarknessSetbackEvent(@NotNull DarknessUser user,
+                                @NotNull String checkName,
+                                @NotNull String checkType,
+                                @NotNull String fullCheckName,
+                                double violations,
+                                double setbackVL) {
+        this(user, null, checkName, checkType, fullCheckName, violations, setbackVL);
     }
 
     @Nullable
-    public DarknessUser getUser() {
-        return DarknessAPI.getUser(player);
+    public AbstractCheck getCheck() {
+        return getCheckInstance();
     }
 
-    @NotNull
-    public CheckType getCheckType() {
-        return CheckType.fromString(check);
+    public UUID getPlayerUUID() {
+        return getUser().getUniqueId();
     }
 
-    @NotNull
-    public CheckCategory getCategory() {
-        return getCheckType().category();
+    public String getUsername() {
+        return getUser().getName();
     }
 
     public int getPing() {
-        DarknessUser user = getUser();
-        return user != null ? user.getTransactionPing() : 0;
+        return getUser().getTransactionPing();
     }
 
-    @Override
-    public boolean isCancelled() {
-        return cancelled;
+    public TrustLevel getTrustLevel() {
+        return getUser().getTrustLevel();
     }
 
-    @Override
-    public void setCancelled(boolean cancel) {
-        this.cancelled = cancel;
+    public int getTrustScore() {
+        return getUser().getTrustScore();
     }
 
-    @NotNull
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
+    public double getTotalViolations() {
+        return getUser().getTotalViolations();
     }
 
-    public static HandlerList getHandlerList() {
-        return handlers;
+    @Nullable
+    public Player getPlayer() {
+        try {
+            return Bukkit.getPlayer(getUser().getUniqueId());
+        } catch (Throwable ignored) {
+            return null;
+        }
     }
 }

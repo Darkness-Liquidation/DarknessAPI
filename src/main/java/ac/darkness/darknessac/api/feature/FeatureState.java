@@ -1,7 +1,16 @@
 package ac.darkness.darknessac.api.feature;
 
 public enum FeatureState {
-    ENABLED, // enabled
-    DISABLED, // disabled
-    UNSET // default
+    ENABLED,
+    DISABLED,
+    UNSET;
+
+    public boolean isEnabled() {
+        return this == ENABLED;
+    }
+
+    public boolean isExplicit() {
+        return this != UNSET;
+    }
 }
+

@@ -5,7 +5,6 @@ import ac.darkness.darknessac.api.common.BasicReloadable;
 import ac.darkness.darknessac.api.config.ConfigReloadable;
 import ac.darkness.darknessac.api.custom.CheckData;
 import ac.darkness.darknessac.api.feature.FeatureManager;
-import ac.darkness.darknessac.api.handler.ResyncHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.InetSocketAddress;
@@ -132,12 +131,6 @@ public interface DarknessUser extends ConfigReloadable, BasicReloadable, Darknes
 
     FeatureManager getFeatureManager();
 
-    default ResyncHandler getResyncHandler() {
-        return null;
-    }
-
-    default void setResyncHandler(ResyncHandler handler) {}
-
     void sendMessage(String message);
 
     boolean hasPermission(String permission);
@@ -159,7 +152,7 @@ public interface DarknessUser extends ConfigReloadable, BasicReloadable, Darknes
     default void setTempBypassTicks(CheckType checkType, long ticks) {
         if (checkType == null) return;
         for (AbstractCheck check : getChecks()) {
-            if (check.getType() == checkType) {
+            if (check.getCheckType() == checkType) {
                 check.setTempBypassTicks(ticks);
             }
         }
@@ -172,7 +165,7 @@ public interface DarknessUser extends ConfigReloadable, BasicReloadable, Darknes
     default void setCategoryTempBypassTicks(CheckCategory category, long ticks) {
         if (category == null) return;
         for (AbstractCheck check : getChecks()) {
-            if (check.getCategory() == category) {
+            if (category.name().equalsIgnoreCase(check.getCategory())) {
                 check.setTempBypassTicks(ticks);
             }
         }
@@ -186,7 +179,7 @@ public interface DarknessUser extends ConfigReloadable, BasicReloadable, Darknes
         if (checkType == null) return false;
         if (isBypassing()) return true;
         for (AbstractCheck check : getChecks()) {
-            if (check.getType() == checkType && check.isBypassing()) {
+            if (check.getCheckType() == checkType && check.isBypassing()) {
                 return true;
             }
         }
@@ -197,11 +190,28 @@ public interface DarknessUser extends ConfigReloadable, BasicReloadable, Darknes
         if (category == null) return false;
         if (isBypassing()) return true;
         for (AbstractCheck check : getChecks()) {
-            if (category == check.getCategory() && check.isBypassing()) {
+            if (category.name().equalsIgnoreCase(check.getCategory()) && check.isBypassing()) {
                 return true;
             }
         }
         return false;
+    }
+
+    default void setCategoryTempBypassTicks(String category, long ticks) {}
+
+    default void setTempBypass(String checkName, long seconds) {
+        setTempBypassTicks(checkName, seconds * 20L);
+    }
+
+    default void setTempBypassTicks(String checkName, long ticks) {}
+
+    default boolean isBypassing(String checkName) {
+        return false;
+    }
+
+    default void setCheckEnabled(String checkName, boolean enabled) {
+        AbstractCheck check = getCheck(checkName);
+        if (check != null) check.setEnabled(enabled);
     }
 
     default boolean isTempBypassing() {
@@ -258,7 +268,7 @@ public interface DarknessUser extends ConfigReloadable, BasicReloadable, Darknes
             default -> {
                 double total = 0.0;
                 for (AbstractCheck c : getChecks()) {
-                    if (category == c.getCategory()) {
+                    if (category.name().equalsIgnoreCase(c.getCategory())) {
                         total += c.getViolations();
                     }
                 }

@@ -1,5 +1,8 @@
 package ac.darkness.darknessac.api;
 
+import ac.darkness.darknessac.api.alerts.AlertManager;
+import ac.darkness.darknessac.api.config.ConfigManager;
+import ac.darkness.darknessac.api.event.EventBus;
 import ac.darkness.darknessac.api.managers.BypassManager;
 import ac.darkness.darknessac.api.managers.PunishmentManager;
 import ac.darkness.darknessac.api.managers.UserManager;
@@ -55,6 +58,30 @@ public final class DarknessAPI {
     @NotNull
     public static ViolationManager getViolationManager() {
         return get().getViolationManager();
+    }
+
+    @NotNull
+    public static EventBus getEventBus() {
+        return get().getEventBus();
+    }
+
+    @NotNull
+    public static EventBus getEventsBus() {
+        return get().getEventBus();
+    }
+
+    @NotNull
+    public static AlertManager getAlertManager() {
+        return get().getAlertManager();
+    }
+
+    @NotNull
+    public static ConfigManager getConfigManager() {
+        return get().getConfigManager();
+    }
+
+    public static String getDarknessVersion() {
+        return get().getDarknessVersion();
     }
 
     // ------------------- USER RESOLUTION -------------------
@@ -195,6 +222,38 @@ public final class DarknessAPI {
 
     public static boolean isBypassing(@NotNull DarknessIdentity identity, @NotNull CheckType checkType) {
         return getBypassManager().isBypassing(identity, checkType);
+    }
+
+    public static void setTempBypass(@NotNull Player player, @NotNull String checkName, long seconds) {
+        getBypassManager().setTempBypass(player, checkName, seconds);
+    }
+
+    public static void setTempBypass(@NotNull UUID uuid, @NotNull String checkName, long seconds) {
+        getBypassManager().setTempBypass(uuid, checkName, seconds);
+    }
+
+    public static void setTempBypassTicks(@NotNull Player player, @NotNull String checkName, long ticks) {
+        getBypassManager().setTempBypassTicks(player, checkName, ticks);
+    }
+
+    public static void setTempBypassTicks(@NotNull UUID uuid, @NotNull String checkName, long ticks) {
+        getBypassManager().setTempBypassTicks(uuid, checkName, ticks);
+    }
+
+    public static boolean isBypassing(@NotNull Player player, @NotNull String checkName) {
+        return getBypassManager().isBypassing(player, checkName);
+    }
+
+    public static boolean isBypassing(@NotNull UUID uuid, @NotNull String checkName) {
+        return getBypassManager().isBypassing(uuid, checkName);
+    }
+
+    public static void setCheckEnabled(@NotNull Player player, @NotNull String checkName, boolean enabled) {
+        getBypassManager().setCheckEnabled(player, checkName, enabled);
+    }
+
+    public static void setCheckEnabled(@NotNull UUID uuid, @NotNull String checkName, boolean enabled) {
+        getBypassManager().setCheckEnabled(uuid, checkName, enabled);
     }
 
     public static boolean isBypassing(@NotNull Player player, @NotNull CheckCategory category) {

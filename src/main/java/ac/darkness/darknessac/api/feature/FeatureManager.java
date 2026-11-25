@@ -1,38 +1,36 @@
 package ac.darkness.darknessac.api.feature;
 
 import ac.darkness.darknessac.api.common.BasicReloadable;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
+/**
+ * Manages player-specific toggles and features in Darkness.
+ */
 public interface FeatureManager extends BasicReloadable {
 
     /**
-     * Retrieves a collection of all feature keys.
-     * @return Collection of feature keys
+     * Gets all registered feature identifiers.
      */
+    @NotNull
     Collection<String> getFeatureKeys();
 
     /**
-     * Retrieves the state of a feature. Null if the feature does not exist.
-     * @param key Feature key
-     * @return Feature state
+     * Retrieves the current state of a feature by its identifier.
      */
-    @Nullable FeatureState getFeatureState(String key);
+    @Nullable
+    FeatureState getFeatureState(String key);
 
     /**
-     * Checks if a feature is enabled.
-     * @param key Feature key
-     * @return True if enabled
+     * Checks whether the specified feature is currently enabled.
      */
     boolean isFeatureEnabled(String key);
 
     /**
-     *  Sets the state of a feature.
-     * @param key Feature key
-     * @param state State to set the feature to.
-     * @return True if the state was successfully set.
+     * Sets or overrides the state of a feature.
      */
     boolean setFeatureState(String key, FeatureState state);
-
 }
+

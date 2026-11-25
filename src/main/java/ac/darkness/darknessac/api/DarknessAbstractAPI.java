@@ -28,6 +28,10 @@ public interface DarknessAbstractAPI extends ConfigReloadable, BasicReloadable {
 
     @NotNull EventBus getEventBus();
 
+    default @NotNull EventBus getEventsBus() {
+        return getEventBus();
+    }
+
     @Nullable DarknessUser getDarknessUser(UUID uuid);
 
     default @Nullable DarknessUser getDarknessUser(Player player) {
@@ -234,6 +238,24 @@ public interface DarknessAbstractAPI extends ConfigReloadable, BasicReloadable {
             }
 
             @Override
+            public void setTempBypass(@NotNull UUID uuid, @NotNull String checkName, long seconds) {
+                DarknessUser user = getUser(uuid);
+                if (user != null) user.setTempBypass(checkName, seconds);
+            }
+
+            @Override
+            public void setTempBypassTicks(@NotNull UUID uuid, @NotNull String checkName, long ticks) {
+                DarknessUser user = getUser(uuid);
+                if (user != null) user.setTempBypassTicks(checkName, ticks);
+            }
+
+            @Override
+            public void setCheckEnabled(@NotNull UUID uuid, @NotNull String checkName, boolean enabled) {
+                DarknessUser user = getUser(uuid);
+                if (user != null) user.setCheckEnabled(checkName, enabled);
+            }
+
+            @Override
             public boolean isBypassing(@NotNull UUID uuid) {
                 DarknessUser user = getUser(uuid);
                 return user != null && user.isBypassing();
@@ -249,6 +271,12 @@ public interface DarknessAbstractAPI extends ConfigReloadable, BasicReloadable {
             public boolean isBypassing(@NotNull UUID uuid, @NotNull CheckCategory category) {
                 DarknessUser user = getUser(uuid);
                 return user != null && user.isBypassing(category);
+            }
+
+            @Override
+            public boolean isBypassing(@NotNull UUID uuid, @NotNull String checkName) {
+                DarknessUser user = getUser(uuid);
+                return user != null && user.isBypassing(checkName);
             }
 
             @Override

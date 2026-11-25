@@ -83,6 +83,36 @@ public interface BypassManager {
         setCategoryTempBypassTicks(identity.getUniqueId(), category, ticks);
     }
 
+    void setTempBypass(@NotNull UUID uuid, @NotNull String checkName, long seconds);
+
+    default void setTempBypass(@NotNull Player player, @NotNull String checkName, long seconds) {
+        setTempBypass(player.getUniqueId(), checkName, seconds);
+    }
+
+    default void setTempBypass(@NotNull DarknessIdentity identity, @NotNull String checkName, long seconds) {
+        setTempBypass(identity.getUniqueId(), checkName, seconds);
+    }
+
+    void setTempBypassTicks(@NotNull UUID uuid, @NotNull String checkName, long ticks);
+
+    default void setTempBypassTicks(@NotNull Player player, @NotNull String checkName, long ticks) {
+        setTempBypassTicks(player.getUniqueId(), checkName, ticks);
+    }
+
+    default void setTempBypassTicks(@NotNull DarknessIdentity identity, @NotNull String checkName, long ticks) {
+        setTempBypassTicks(identity.getUniqueId(), checkName, ticks);
+    }
+
+    void setCheckEnabled(@NotNull UUID uuid, @NotNull String checkName, boolean enabled);
+
+    default void setCheckEnabled(@NotNull Player player, @NotNull String checkName, boolean enabled) {
+        setCheckEnabled(player.getUniqueId(), checkName, enabled);
+    }
+
+    default void setCheckEnabled(@NotNull DarknessIdentity identity, @NotNull String checkName, boolean enabled) {
+        setCheckEnabled(identity.getUniqueId(), checkName, enabled);
+    }
+
     boolean isBypassing(@NotNull UUID uuid);
 
     default boolean isBypassing(@NotNull Player player) {
@@ -111,6 +141,16 @@ public interface BypassManager {
 
     default boolean isBypassing(@NotNull DarknessIdentity identity, @NotNull CheckCategory category) {
         return isBypassing(identity.getUniqueId(), category);
+    }
+
+    boolean isBypassing(@NotNull UUID uuid, @NotNull String checkName);
+
+    default boolean isBypassing(@NotNull Player player, @NotNull String checkName) {
+        return isBypassing(player.getUniqueId(), checkName);
+    }
+
+    default boolean isBypassing(@NotNull DarknessIdentity identity, @NotNull String checkName) {
+        return isBypassing(identity.getUniqueId(), checkName);
     }
 
     void resetBypass(@NotNull UUID uuid);

@@ -61,7 +61,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.Darkness-Liquidation:DarknessAPI:1.1.0")
+    compileOnly("com.github.Darkness-Liquidation:DarknessAPI:1.2.2")
 }
 ```
 
@@ -74,7 +74,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.Darkness-Liquidation:DarknessAPI:1.1.0'
+    compileOnly 'com.github.Darkness-Liquidation:DarknessAPI:1.2.2'
 }
 ```
 
@@ -92,7 +92,7 @@ dependencies {
     <dependency>
         <groupId>com.github.Darkness-Liquidation</groupId>
         <artifactId>DarknessAPI</artifactId>
-        <version>1.1.0</version>
+        <version>1.2.2</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -145,19 +145,38 @@ bypass.setCategoryTempBypassTicks(uuid, CheckCategory.MOVEMENT, 40);
 bypass.setTempBypassTicks(player, CheckType.SPRINT, 30);
 bypass.setTempBypassTicks(uuid, CheckType.SPRINT, 30);
 
-// 3. Полный временный иммунитет на время катсцены (в секундах)
+// 3. Отключение или байпасс ОПРЕДЕЛЕННОГО чека по имени (например, только SpeedA или FlightB)
+// Если багует только один подтип — не нужно выключать весь Speed или всю категорию Movement!
+bypass.setTempBypassTicks(player, "SpeedA", 40);         // Временный байпасс на 40 тиков (2 сек)
+bypass.setTempBypass(player, "Flight (B)", 5);           // Временный байпасс на 5 секунд
+bypass.setCheckEnabled(player, "SpeedA", false);         // Полное отключение конкретного чека для игрока
+boolean speedAbypassing = bypass.isBypassing(player, "SpeedA"); // Проверка статуса
+
+// То же самое можно вызывать напрямую через DarknessAPI:
+DarknessAPI.setTempBypass(player, "SpeedA", 5);
+DarknessAPI.setCheckEnabled(player, "SpeedA", true);
+
+// Или точечно через объект чека конкретного игрока:
+DarknessAPI.findUser(player)
+    .flatMap(u -> u.findCheck("SpeedA"))
+    .ifPresent(check -> {
+        check.setTempBypass(5);    // Временный байпасс на 5 сек
+        check.setEnabled(false);   // Полное отключение чека
+    });
+
+// 4. Полный временный иммунитет на время катсцены (в секундах)
 bypass.setTempBypass(player, 5);
 
-// 4. Проверка статуса иммунитета
+// 5. Проверка статуса иммунитета
 if (bypass.isBypassing(player, CheckCategory.MOVEMENT)) {
     // У игрока временно отключены проверки движения
 }
 
-// 5. Динамический предикат байпасса (без возни с тиками и ручным сбросом!)
+// 6. Динамический предикат байпасса (без возни с тиками и ручным сбросом!)
 // Идеально для скиллов с неизвестной длительностью или транспорта (полет на драконе, езда на кастомном маунте):
 DarknessAPI.registerBypassPredicate(CheckCategory.MOVEMENT, p -> isFlyingDragon(p));
 
-// 6. Досрочный сброс временного байпасса (например, если скилл прервали оглушением)
+// 7. Досрочный сброс временного байпасса (например, если скилл прервали оглушением)
 bypass.resetBypass(player);
 ```
 
@@ -282,47 +301,50 @@ if (user != null) {
 
 ---
 
-#### Сценарий 5: Отмена флагов в мирных зонах и защита персонала (События)
+#### Сценарий 5: События античита (`EventBus` и `@DarknessEventHandler`)
 
-**Проблема**: В лобби спавна установлены декоративные лаунчпады, вызывающие детекты, а тестирующий администратор не должен улететь в бан.
+Darkness использует собственную высокопроизводительную неблокирующую шину событий `EventBus` (`DarknessAPI.INSTANCE.getEventBus()`), обеспечивающую кроссплатформенность без зависимости от `Bukkit.getPluginManager().callEvent()`.
 
 ```java
+import ac.darkness.darknessac.api.DarknessAPI;
 import ac.darkness.darknessac.api.TrustLevel;
-import ac.darkness.darknessac.api.events.DarknessViolationEvent;
-import ac.darkness.darknessac.api.events.DarknessSetbackEvent;
-import ac.darkness.darknessac.api.events.DarknessTrustChangeEvent;
-import ac.darkness.darknessac.api.events.DarknessPunishEvent;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
+import ac.darkness.darknessac.api.event.DarknessEventHandler;
+import ac.darkness.darknessac.api.events.*;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
-public class AnticheatIntegrationListener implements Listener {
+public class AnticheatIntegrationListener {
+
+    // Регистрация в onEnable():
+    // DarknessAPI.INSTANCE.getEventBus().registerAnnotatedListeners(plugin, this);
 
     // 1. Отмена ложных флагов на спавне или в мирных лобби
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    @DarknessEventHandler(priority = 0, ignoreCancelled = true)
     public void onViolation(DarknessViolationEvent event) {
-        if (event.getPlayer().getWorld().getName().equalsIgnoreCase("spawn_lobby")) {
+        Player player = event.getPlayer();
+        if (player != null && player.getWorld().getName().equalsIgnoreCase("spawn_lobby")) {
             event.setCancelled(true);
             return;
         }
 
         // Логирование критических детектов в Discord
         if (event.getViolations() >= 15.0 && !event.isExperimental()) {
-            sendDiscordAlert(event.getPlayer().getName(), event.getFullCheckName(), event.getViolations());
+            sendDiscordAlert(event.getUsername(), event.getFullCheckName(), event.getViolations());
         }
     }
 
     // 2. Отмена отката (сетбэка) в зонах кастомного паркура
     // Флаг и запись в логах остаются, но игрока НЕ откидывает назад!
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    @DarknessEventHandler(priority = 0, ignoreCancelled = true)
     public void onSetback(DarknessSetbackEvent event) {
-        if (event.getPlayer().getWorld().getName().equalsIgnoreCase("parkour")) {
+        Player player = event.getPlayer();
+        if (player != null && player.getWorld().getName().equalsIgnoreCase("parkour")) {
             event.setCancelled(true); // Отменяем откат
         }
     }
 
     // 3. Мгновенная реакция на падение Trust Factor (GREEN -> ORANGE -> RED)
-    @EventHandler(priority = EventPriority.MONITOR)
+    @DarknessEventHandler
     public void onTrustChange(DarknessTrustChangeEvent event) {
         if (event.getNewLevel() == TrustLevel.RED) {
             notifyStaff("§cВнимание! Фактор доверия игрока " + event.getUsername() + " упал до RED (" + event.getTrustScore() + "%).");
@@ -330,12 +352,35 @@ public class AnticheatIntegrationListener implements Listener {
     }
 
     // 4. Отмена наказания для стаффа с правами
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @DarknessEventHandler(priority = 100, ignoreCancelled = true)
     public void onPunish(DarknessPunishEvent event) {
-        if (event.getPlayer().hasPermission("darkness.bypass.punish")) {
+        Player player = event.getPlayer();
+        if (player != null && player.hasPermission("darkness.bypass.punish")) {
             event.setCancelled(true); // Отменяем бан/кик
-            event.getPlayer().sendMessage("§cНаказание античита отменено: у вас есть иммунитет.");
+            player.sendMessage("§cНаказание античита отменено: у вас есть иммунитет.");
         }
+    }
+
+    // 5. Перехват волны наказаний (Ban Wave)
+    @DarknessEventHandler
+    public void onPunishWave(DarknessPunishWaveEvent event) {
+        int queued = event.getPlayerUUIDs().size();
+        int online = event.getOnlinePlayers().size();
+        notifyStaff("Волна банов: " + queued + " игроков в очереди (" + online + " онлайн)");
+    }
+
+    // 6. Перехват команд наказаний античита
+    @DarknessEventHandler
+    public void onCommandExecute(DarknessCommandExecuteEvent event) {
+        if (event.getCommand().startsWith("say ")) {
+            event.setCommand(event.getCommand() + " [Verified]");
+        }
+    }
+
+    // 7. Уведомление о завершении перезагрузки конфигурации античита
+    @DarknessEventHandler
+    public void onReload(DarknessReloadEvent event) {
+        plugin.getLogger().info("Darkness reloaded! Success=" + event.isSuccess() + " (took " + event.getDurationMillis() + "ms)");
     }
 }
 ```

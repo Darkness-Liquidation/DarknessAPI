@@ -61,7 +61,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.Darkness-Liquidation:DarknessAPI:1.1.0")
+    compileOnly("com.github.Darkness-Liquidation:DarknessAPI:1.2.2")
 }
 ```
 
@@ -74,7 +74,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.Darkness-Liquidation:DarknessAPI:1.1.0'
+    compileOnly 'com.github.Darkness-Liquidation:DarknessAPI:1.2.2'
 }
 ```
 
@@ -92,7 +92,7 @@ dependencies {
     <dependency>
         <groupId>com.github.Darkness-Liquidation</groupId>
         <artifactId>DarknessAPI</artifactId>
-        <version>1.1.0</version>
+        <version>1.2.2</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -145,19 +145,38 @@ bypass.setCategoryTempBypassTicks(uuid, CheckCategory.MOVEMENT, 40);
 bypass.setTempBypassTicks(player, CheckType.SPRINT, 30);
 bypass.setTempBypassTicks(uuid, CheckType.SPRINT, 30);
 
-// 3. Full temporary immunity during cinematic cutscenes (in seconds)
+// 3. Disable or bypass a SPECIFIC individual check by name (e.g. only SpeedA or FlightB)
+// If only one subtype false-flags, you don't need to disable all Speed checks or the entire Movement category!
+bypass.setTempBypassTicks(player, "SpeedA", 40);         // Temporary bypass for 40 ticks (2 sec)
+bypass.setTempBypass(player, "Flight (B)", 5);           // Temporary bypass for 5 seconds
+bypass.setCheckEnabled(player, "SpeedA", false);         // Completely disable a specific check for this player
+boolean speedAbypassing = bypass.isBypassing(player, "SpeedA"); // Query status
+
+// Can also be invoked directly via DarknessAPI:
+DarknessAPI.setTempBypass(player, "SpeedA", 5);
+DarknessAPI.setCheckEnabled(player, "SpeedA", true);
+
+// Or on the player's check object directly:
+DarknessAPI.findUser(player)
+    .flatMap(u -> u.findCheck("SpeedA"))
+    .ifPresent(check -> {
+        check.setTempBypass(5);    // Temporary bypass for 5 sec
+        check.setEnabled(false);   // Completely toggle check
+    });
+
+// 4. Full temporary immunity during cinematic cutscenes (in seconds)
 bypass.setTempBypass(player, 5);
 
-// 4. Query bypass status
+// 5. Query bypass status
 if (bypass.isBypassing(player, CheckCategory.MOVEMENT)) {
     // Player has active movement check immunity
 }
 
-// 5. Dynamic condition-based bypass predicate (no tick tracking or manual resets!):
+// 6. Dynamic condition-based bypass predicate (no tick tracking or manual resets!):
 // Example: bypass movement checks as long as player is riding a custom dragon
 DarknessAPI.registerBypassPredicate(CheckCategory.MOVEMENT, p -> isFlyingDragon(p));
 
-// 6. Prematurely cancel temporary bypass (e.g. if the skill was interrupted by a stun)
+// 7. Prematurely cancel temporary bypass (e.g. if the skill was interrupted by a stun)
 bypass.resetBypass(player);
 ```
 
@@ -282,60 +301,86 @@ if (user != null) {
 
 ---
 
-#### Scenario 5: Peace-Zone Flag Cancellation & Staff Protection (Events)
+#### Scenario 5: Anticheat Events (`EventBus` & `@DarknessEventHandler`)
 
-**Problem**: Decorative launchpads in the lobby cause false flags, and staff members testing mechanics should never be accidentally banned.
+Darkness features its own high-throughput, non-blocking `EventBus` (`DarknessAPI.INSTANCE.getEventBus()`), eliminating fragile dependencies on `Bukkit.getPluginManager().callEvent()`.
 
 ```java
+import ac.darkness.darknessac.api.DarknessAPI;
 import ac.darkness.darknessac.api.TrustLevel;
-import ac.darkness.darknessac.api.events.DarknessViolationEvent;
-import ac.darkness.darknessac.api.events.DarknessSetbackEvent;
-import ac.darkness.darknessac.api.events.DarknessTrustChangeEvent;
-import ac.darkness.darknessac.api.events.DarknessPunishEvent;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
+import ac.darkness.darknessac.api.event.DarknessEventHandler;
+import ac.darkness.darknessac.api.events.*;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
-public class AnticheatIntegrationListener implements Listener {
+public class AnticheatIntegrationListener {
+
+    // Register in onEnable():
+    // DarknessAPI.INSTANCE.getEventBus().registerAnnotatedListeners(plugin, this);
 
     // 1. Cancel false flags in designated lobby worlds or WorldGuard regions
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    @DarknessEventHandler(priority = 0, ignoreCancelled = true)
     public void onViolation(DarknessViolationEvent event) {
-        if (event.getPlayer().getWorld().getName().equalsIgnoreCase("spawn_lobby")) {
+        Player player = event.getPlayer();
+        if (player != null && player.getWorld().getName().equalsIgnoreCase("spawn_lobby")) {
             event.setCancelled(true);
             return;
         }
 
         // Forward severe detections to Discord
         if (event.getViolations() >= 15.0 && !event.isExperimental()) {
-            sendDiscordAlert(event.getPlayer().getName(), event.getFullCheckName(), event.getViolations());
+            sendDiscordAlert(event.getUsername(), event.getFullCheckName(), event.getViolations());
         }
     }
 
     // 2. Cancel setback teleports in custom parkour areas
     // Detections and violations are still logged, but player is NOT teleported back!
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    @DarknessEventHandler(priority = 0, ignoreCancelled = true)
     public void onSetback(DarknessSetbackEvent event) {
-        if (event.getPlayer().getWorld().getName().equalsIgnoreCase("parkour")) {
+        Player player = event.getPlayer();
+        if (player != null && player.getWorld().getName().equalsIgnoreCase("parkour")) {
             event.setCancelled(true); // Prevent rollback teleport
         }
     }
 
     // 3. React immediately when a player's Trust Factor degrades (GREEN -> ORANGE -> RED)
-    @EventHandler(priority = EventPriority.MONITOR)
+    @DarknessEventHandler
     public void onTrustChange(DarknessTrustChangeEvent event) {
         if (event.getNewLevel() == TrustLevel.RED) {
             notifyStaff("Alert: " + event.getUsername() + " trust factor dropped to RED (" + event.getTrustScore() + "%)");
         }
     }
 
-    // 4. Prevent staff from being kicked/banned during testing
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    // 4. Cancel punishment execution for staff members with bypass permissions
+    @DarknessEventHandler(priority = 100, ignoreCancelled = true)
     public void onPunish(DarknessPunishEvent event) {
-        if (event.getPlayer().hasPermission("darkness.bypass.punish")) {
-            event.setCancelled(true); // Cancels punishment execution
-            event.getPlayer().sendMessage("§cAnticheat punishment cancelled: staff immunity.");
+        Player player = event.getPlayer();
+        if (player != null && player.hasPermission("darkness.bypass.punish")) {
+            event.setCancelled(true); // Cancel ban or kick
+            player.sendMessage("Anticheat punishment bypassed: you have staff immunity.");
         }
+    }
+
+    // 5. Intercept punishment waves (Ban Waves)
+    @DarknessEventHandler
+    public void onPunishWave(DarknessPunishWaveEvent event) {
+        int queued = event.getPlayerUUIDs().size();
+        int online = event.getOnlinePlayers().size();
+        notifyStaff("Ban wave: " + queued + " players queued (" + online + " currently online)");
+    }
+
+    // 6. Intercept anticheat command executions
+    @DarknessEventHandler
+    public void onCommandExecute(DarknessCommandExecuteEvent event) {
+        if (event.getCommand().startsWith("say ")) {
+            event.setCommand(event.getCommand() + " [Verified]");
+        }
+    }
+
+    // 7. Receive notification when Darkness configuration reload completes
+    @DarknessEventHandler
+    public void onReload(DarknessReloadEvent event) {
+        plugin.getLogger().info("Darkness reloaded! Success=" + event.isSuccess() + " (took " + event.getDurationMillis() + "ms)");
     }
 }
 ```

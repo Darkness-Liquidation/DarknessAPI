@@ -6,6 +6,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Darkness configuration accessor providing typed lookups with default fallbacks.
+ */
 public interface ConfigManager extends BasicReloadable {
 
     String getStringElse(String key, String otherwise);
@@ -27,7 +30,8 @@ public interface ConfigManager extends BasicReloadable {
     @Nullable <T> T get(String key);
 
     @Nullable <T> T getElse(String key, T otherwise);
-    void setBoolean(String var1, boolean var2);
+
+    void setBoolean(String key, boolean value);
 
     @Nullable <K, V> Map<K, V> getMap(String key);
 

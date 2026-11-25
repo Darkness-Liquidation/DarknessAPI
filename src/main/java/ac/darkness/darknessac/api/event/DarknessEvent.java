@@ -2,9 +2,9 @@ package ac.darkness.darknessac.api.event;
 
 import lombok.Getter;
 
-public abstract class DarknessEvent {
-    private @Getter boolean cancelled = false;
-    private final boolean async;
+public abstract class DarknessEvent implements Cancellable {
+    private boolean cancelled = false;
+    @Getter private final boolean async;
 
     protected DarknessEvent() {
         this(false); // Default to sync
@@ -14,6 +14,12 @@ public abstract class DarknessEvent {
         this.async = async;
     }
 
+    @Override
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    @Override
     public void setCancelled(boolean cancelled) {
         if (!isCancellable()) {
             throw new IllegalStateException("Event " + getEventName() + " is not cancellable");

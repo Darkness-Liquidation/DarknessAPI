@@ -1,91 +1,108 @@
 package ac.darkness.darknessac.api.events;
 
-import ac.darkness.darknessac.api.DarknessAPI;
+import ac.darkness.darknessac.api.AbstractCheck;
 import ac.darkness.darknessac.api.DarknessUser;
+import ac.darkness.darknessac.api.TrustLevel;
+import ac.darkness.darknessac.api.event.DarknessVerboseCheckEvent;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class DarknessViolationEvent extends Event implements Cancellable {
-    private static final HandlerList handlers = new HandlerList();
+import java.util.UUID;
 
-    private final Player player;
+public class DarknessViolationEvent extends DarknessVerboseCheckEvent {
     @Getter private final String check;
     @Getter private final String type;
     @Getter private final String fullCheckName;
-    @Getter private final String verbose;
+    @Getter private final String description;
     @Getter private final double violations;
     @Getter private final boolean experimental;
-    private boolean cancelled = false;
 
-    public DarknessViolationEvent(@NotNull Player player,
+    public DarknessViolationEvent(@NotNull DarknessUser user,
+                                  @Nullable AbstractCheck checkInstance,
+                                  @NotNull String check,
+                                  @NotNull String type,
+                                  @NotNull String fullCheckName,
+                                  @NotNull String description,
+                                  double violations,
+                                  boolean experimental,
+                                  @NotNull String verbose) {
+        super(user, checkInstance, verbose, true);
+        this.check = check;
+        this.type = type;
+        this.fullCheckName = fullCheckName;
+        this.description = description;
+        this.violations = violations;
+        this.experimental = experimental;
+    }
+
+    public DarknessViolationEvent(@NotNull DarknessUser user,
                                   @NotNull String check,
                                   @NotNull String type,
                                   @NotNull String fullCheckName,
                                   @NotNull String verbose,
                                   double violations,
                                   boolean experimental) {
-        this(player, check, type, fullCheckName, verbose, violations, experimental,
-                !Bukkit.isPrimaryThread());
-    }
-
-    public DarknessViolationEvent(@NotNull Player player,
-                                  @NotNull String check,
-                                  @NotNull String type,
-                                  @NotNull String fullCheckName,
-                                  @NotNull String verbose,
-                                  double violations,
-                                  boolean experimental,
-                                  boolean isAsync) {
-        super(isAsync);
-        this.player = player;
-        this.check = check;
-        this.type = type;
-        this.fullCheckName = fullCheckName;
-        this.verbose = verbose;
-        this.violations = violations;
-        this.experimental = experimental;
+        this(user, null, check, type, fullCheckName, "", violations, experimental, verbose);
     }
 
     @NotNull
-    public Player getPlayer() {
-        return player;
+    public String getCheckName() {
+        return check;
+    }
+
+    public UUID getPlayerUUID() {
+        return getUser().getUniqueId();
+    }
+
+    public String getUsername() {
+        return getUser().getName();
     }
 
     @Nullable
-    public DarknessUser getUser() {
-        return DarknessAPI.INSTANCE != null
-                ? DarknessAPI.INSTANCE.getUser(player)
-                : DarknessAPI.getUser(player);
+    public Player getPlayer() {
+        try {
+            return Bukkit.getPlayer(getUser().getUniqueId());
+        } catch (Throwable ignored) {
+            return null;
+        }
     }
 
     public int getPing() {
-        DarknessUser user = getUser();
-        return user != null ? user.getTransactionPing() : 0;
+        return getUser().getTransactionPing();
     }
 
-    @Override
-    public boolean isCancelled() {
-        return cancelled;
+    public TrustLevel getTrustLevel() {
+        return getUser().getTrustLevel();
     }
 
-    @Override
-    public void setCancelled(boolean cancel) {
-        this.cancelled = cancel;
+    public int getTrustScore() {
+        return getUser().getTrustScore();
     }
 
-    @NotNull
-    @Override
-    public HandlerList getHandlers() {
-        return handlers;
+    public double getTotalViolations() {
+        return getUser().getTotalViolations();
     }
 
-    public static HandlerList getHandlerList() {
-        return handlers;
+    public boolean isSetback() {
+        AbstractCheck checkInstance = getCheckInstance();
+        return checkInstance != null && violations > checkInstance.getSetbackVL();
+    }
+
+    public double getSetbackVL() {
+        AbstractCheck checkInstance = getCheckInstance();
+        return checkInstance != null ? checkInstance.getSetbackVL() : 0.0;
+    }
+
+    public double getDecay() {
+        AbstractCheck checkInstance = getCheckInstance();
+        return checkInstance != null ? checkInstance.getDecay() : 0.0;
+    }
+
+    public double getBuffer() {
+        AbstractCheck checkInstance = getCheckInstance();
+        return checkInstance != null ? checkInstance.getBuffer() : 0.0;
     }
 }
